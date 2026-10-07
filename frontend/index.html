@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aplicação web do projeto PI IV - TIME21.">
+    <title>PI IV - TIME21</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+    <script src="src/js/app.js" defer></script>
+</head>
+<body>
+    <main class="page">
+        <header class="page__header">
+            <p class="eyebrow">Projeto Integrador IV</p>
+            <h1>TIME21</h1>
+            <p class="page__description">Base inicial da aplicação web.</p>
+        </header>
+
+        <section class="status" aria-labelledby="status-title">
+            <div class="status__indicator" id="status-indicator" aria-hidden="true"></div>
+            <div>
+                <h2 id="status-title">Conexão com o backend</h2>
+                <p id="status-message" role="status" aria-live="polite">Verificando API...</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
