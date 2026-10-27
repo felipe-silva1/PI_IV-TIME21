@@ -2,19 +2,29 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>GuiaVest - Escolha de exames</title>
     <link rel="stylesheet" href="../src/css/base.css">
+    <link rel="stylesheet" href="../src/css/layout.css">
+    <link rel="stylesheet" href="../src/css/escolha-exame.css">
 </head>
 <body>
-    <h1>Escolha qual exame você quer focar</h1>
-    <div class="button-exam-row">
-        <button type="button" data-pagina="cronograma.html" class="button-exam">Enem</button>
-        <button type="button" data-pagina="cronograma.html" class="button-exam">Fuvest</button>
-        <button type="button" data-pagina="cronograma.html" class="button-exam">Unicamp</button>
-        <button type="button" data-pagina="cronograma.html" class="button-exam">UNESP</button>
-        <button type="button" data-pagina="cronograma.html" class="button-exam">Outros exames</button>
-    </div>
+    <header class="topo">
+        <div class="logo">GuiaVest</div>
+    </header>
+
+    <main class="conteudo">
+        <h1>Escolha qual exame você quer focar</h1>
+        <p class="legenda">Seu cronograma será montado a partir do exame escolhido.</p>
+        <div class="grade">
+            <button type="button" data-pagina="cronograma.html" class="button-exam">Enem</button>
+            <button type="button" data-pagina="cronograma.html" class="button-exam">Fuvest</button>
+            <button type="button" data-pagina="cronograma.html" class="button-exam">Unicamp</button>
+            <button type="button" data-pagina="cronograma.html" class="button-exam">UNESP</button>
+            <button type="button" data-pagina="cronograma.html" class="button-exam">Outros exames</button>
+        </div>
+    </main>
+
     <script src="../src/js/navegacao.js"></script>
 </body>
 </html>
