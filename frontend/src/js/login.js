@@ -1,66 +1,34 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-  const loginMessage = document.getElementById('loginMessage');
-  const registerMessage = document.getElementById('registerMessage');
-  const toggleButtons = document.querySelectorAll('.toggle-password');
+const formLogin = document.getElementById('form-login');
+const emailValido = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
-  if (loginForm) {
-    loginForm.addEventListener('submit', (event) => {
-      event.preventDefault();
+function marcar(campos, ruim) {
+  campos.forEach(c => c.setAttribute('aria-invalid', c === ruim ? 'true' : 'false'));
+}
 
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value.trim();
+document.querySelector('.mostrar-senha').addEventListener('click', e => {
+  const btn = e.currentTarget;
+  const senha = btn.previousElementSibling;
+  const mostrar = senha.type === 'password';
+  senha.type = mostrar ? 'text' : 'password';
+  btn.textContent = mostrar ? 'Ocultar' : 'Mostrar';
+  btn.setAttribute('aria-label', mostrar ? 'Ocultar senha' : 'Mostrar senha');
+});
 
-      if (!email || !password) {
-        loginMessage.textContent = 'Preencha e-mail e senha para continuar.';
-        loginMessage.className = 'form-message error';
-        return;
-      }
+formLogin.addEventListener('submit', e => {
+  e.preventDefault();
+  const [email, senha] = formLogin.querySelectorAll('input');
+  const erro = document.getElementById('l-erro');
+  const ok = document.getElementById('l-ok');
+  ok.textContent = '';
+  let msg = '', ruim = null;
 
-      loginMessage.textContent = `Login realizado com sucesso para ${email}!`;
-      loginMessage.className = 'form-message success';
-    });
-  }
+  if (!emailValido(email.value)) { msg = 'Digite um e-mail válido.'; ruim = email; }
+  else if (!senha.value) { msg = 'Digite sua senha.'; ruim = senha; }
 
-  if (registerForm) {
-    registerForm.addEventListener('submit', (event) => {
-      event.preventDefault();
+  marcar([email, senha], ruim);
+  erro.textContent = msg;
+  if (ruim) return ruim.focus();
 
-      const fullName = document.getElementById('fullName').value.trim();
-      const email = document.getElementById('registerEmail').value.trim();
-      const password = document.getElementById('registerPassword').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-
-      if (!fullName || !email || !password || !confirmPassword) {
-        registerMessage.textContent = 'Todos os campos são obrigatórios.';
-        registerMessage.className = 'form-message error';
-        return;
-      }
-
-      if (password.length < 6) {
-        registerMessage.textContent = 'A senha deve ter pelo menos 6 caracteres.';
-        registerMessage.className = 'form-message error';
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        registerMessage.textContent = 'As senhas não coincidem.';
-        registerMessage.className = 'form-message error';
-        return;
-      }
-
-      registerMessage.textContent = `Conta criada com sucesso para ${fullName}!`;
-      registerMessage.className = 'form-message success';
-    });
-  }
-
-  toggleButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const input = button.previousElementSibling;
-      const shouldShow = input.type === 'password';
-      input.type = shouldShow ? 'text' : 'password';
-      button.textContent = shouldShow ? 'Ocultar' : 'Mostrar';
-    });
-  });
+  ok.textContent = 'Login válido! Redirecionando…';
+  location.href = 'pages/dashboard.html';
 });

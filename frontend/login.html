@@ -1,52 +1,57 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="src/css/login.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GuiaVest - Login</title>
+<link rel="stylesheet" href="src/css/base.css">
+<link rel="stylesheet" href="src/css/acesso.css">
+<link rel="stylesheet" href="src/css/login.css">
 </head>
 <body>
-    <main class="login-page">
-        <aside class="left-side">
-            <div class="brand-area">
-                <div class="brand-logo">Projeto</div>
-                <h2>Bem vindo ao Vest...</h2>
-                <p>Junte-se a nos na jornada de um vestibulando, cadastros, rotinas, metas e muito mais.</p>
-                <p>Não possue conta? Clique abaixo em criar conta.</p>
-            </div>
-        </aside>
+  <main class="janela">
+    <aside class="lateral">
+      <div class="logo">GuiaVest</div>
+      <div>
+        <h1>Sua rotina de estudos, organizada do seu jeito.</h1>
+        <p>Cronogramas personalizados, metas diárias e alertas para você não perder o ritmo até a prova.</p>
+        <ul>
+          <li>Cronograma gerado a partir do seu exame e datas</li>
+          <li>Acompanhe o progresso das metas em tempo real</li>
+          <li>Redistribua atrasos sem perder o fio da meada</li>
+        </ul>
+      </div>
+      <div class="rodape"></div>
+    </aside>
 
-        <section class="right-side">
-            <div class="login-container">
-                <form id="loginForm" class="login-form">
-                    <h1 class="title">Login</h1>
+    <section class="formulario">
+      <div class="caixa">
 
-                    <div class="input-group">
-                        <label for="loginEmail">E-mail</label>
-                        <input id="loginEmail" type="email" placeholder="Digite seu e-mail" required>
-                    </div>
+        <form id="form-login" class="ativo" novalidate>
+          <h2>Entrar</h2>
+          <p class="sub">Continue de onde parou</p>
 
-                    <div class="input-group">
-                        <label for="loginPassword">Senha</label>
-                        <div class="password-wrapper">
-                            <input id="loginPassword" type="password" placeholder="Digite sua senha" required>
-                            <button type="button" class="toggle-password" aria-label="Mostrar senha">Mostrar</button>
-                        </div>
-                    </div>
+          <label for="l-email">E-mail</label>
+          <input id="l-email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required>
 
-                    <button type="submit" class="login-button">Entrar</button>
+          <label for="l-senha">Senha</label>
+          <div class="senha">
+            <input id="l-senha" type="password" placeholder="Digite sua senha" autocomplete="current-password" required>
+            <button type="button" class="mostrar-senha" aria-label="Mostrar senha">Mostrar</button>
+          </div>
 
-                    <div class="bottom-link">
-                        <a href="cadastro.html">Criar conta</a>
-                    </div>
+          <p class="erro" id="l-erro" role="alert"></p>
+          <button class="principal" type="submit">Entrar</button>
+          <p class="sucesso" id="l-ok"></p>
 
-                    <div id="loginMessage" class="form-message" aria-live="polite"></div>
-                </form>
-            </div>
-        </section>
-    </main>
+          <p class="troca">Ainda não tem conta? <button type="button" data-pagina="pages/cadastro.html">Criar conta</button></p>
+        </form>
 
-    <script src="src/js/login.js"></script>
+      </div>
+    </section>
+  </main>
+
+<script src="src/js/navegacao.js"></script>
+<script src="src/js/login.js"></script>
 </body>
 </html>
