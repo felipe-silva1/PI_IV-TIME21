@@ -1,19 +1,9 @@
-html, body { height: 100%; }
-body {
-  background: var(--fundo);
-  color: var(--texto);
-  display: grid;
-  place-items: center;
-  padding: var(--espaco-5);
-}
+/* A janela ocupa a tela inteira: painel estreito da marca à esquerda, formulário em destaque */
 .janela {
-  width: 100%;
-  max-width: 1000px;
-  min-height: 600px;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  border-radius: var(--raio-grande);
-  overflow: hidden;
+  grid-template-columns: clamp(260px, 24vw, 360px) 1fr;
   background: var(--fundo);
 }
 
@@ -85,8 +75,15 @@ button.principal:focus-visible { outline: 2px solid var(--texto); outline-offset
 .sucesso { margin-top: var(--espaco-3); font-size: .8rem; color: var(--sucesso); min-height: 1.2em; text-align: center; }
 
 @media (max-width: 760px) {
-  .janela { grid-template-columns: 1fr; }
+  .janela { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .formulario { padding: var(--espaco-6) var(--espaco-5); place-items: start center; }
+  input { font-size: 1rem; } /* abaixo de 16px o iPhone dá zoom ao focar o campo */
   .lateral { padding: var(--espaco-6) var(--espaco-5); gap: var(--espaco-6); }
   .lateral ul, .lateral p { display: none; }
   .lateral h1 { margin: 0; font-size: 1.2rem; }
+}
+
+@media (max-width: 480px) {
+  .lateral { padding: var(--espaco-5) var(--espaco-4); gap: var(--espaco-4); }
+  .formulario { padding: var(--espaco-5) var(--espaco-4); }
 }
