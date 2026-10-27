@@ -1,0 +1,59 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Sora:wght@500;600;700&display=swap");
+
+/* Paleta e tipografia do Figma do projeto */
+:root {
+  --azul-primario: #5b8df5;
+  --azul-secundario: #eaf1fe;
+  --vermelho-escuro: #950606;
+  --sucesso: #22a06b;
+  --alerta: #f5a623;
+  --premium: #7c6ff0;
+
+  --fundo: #121417;
+  --subfundo: #262a32;
+  --card: #1b1e24;
+  --texto: #f2f3f5;
+  --texto-suave: #9aa0ac;
+  --fundo-secundario: #02051b;
+
+  --fonte-titulo: "Sora", system-ui, sans-serif;
+  --fonte-corpo: "Inter", system-ui, sans-serif;
+
+  /* Espaçamentos em múltiplos de 4px */
+  --espaco-1: 0.25rem; /* 4px */
+  --espaco-2: 0.5rem;  /* 8px */
+  --espaco-3: 0.75rem; /* 12px */
+  --espaco-4: 1rem;    /* 16px */
+  --espaco-5: 1.5rem;  /* 24px */
+  --espaco-6: 2rem;    /* 32px */
+  --espaco-7: 2.5rem;  /* 40px */
+  --espaco-8: 3rem;    /* 48px */
+
+  --raio: 8px;
+  --raio-grande: 20px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte-corpo);
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.5;
+}
+
+h1, h2, h3 { font-family: var(--fonte-titulo); line-height: 1.25; }
+h1 { font-size: 1.75rem; font-weight: 700; }  /* 28px */
+h2 { font-size: 1.25rem; font-weight: 600; }  /* 20px */
+h3 { font-size: 1rem; font-weight: 500; }     /* 16px */
+
+label { font-size: 0.8125rem; font-weight: 500; } /* 13px */
+
+small, .legenda { font-size: 0.75rem; color: var(--texto-suave); } /* 12px */
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+a { color: var(--azul-primario); }
