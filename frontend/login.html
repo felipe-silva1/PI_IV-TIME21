@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="src/css/login.css">
+</head>
+<body>
+    <main class="login-page">
+        <aside class="left-side">
+            <div class="brand-area">
+                <div class="brand-logo">Projeto</div>
+                <h2>Bem vindo ao Vest...</h2>
+                <p>Junte-se a nos na jornada de um vestibulando, cadastros, rotinas, metas e muito mais.</p>
+                <p>Não possue conta? Clique abaixo em criar conta.</p>
+            </div>
+        </aside>
+
+        <section class="right-side">
+            <div class="login-container">
+                <form id="loginForm" class="login-form">
+                    <h1 class="title">Login</h1>
+
+                    <div class="input-group">
+                        <label for="loginEmail">E-mail</label>
+                        <input id="loginEmail" type="email" placeholder="Digite seu e-mail" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="loginPassword">Senha</label>
+                        <div class="password-wrapper">
+                            <input id="loginPassword" type="password" placeholder="Digite sua senha" required>
+                            <button type="button" class="toggle-password" aria-label="Mostrar senha">Mostrar</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-button">Entrar</button>
+
+                    <div class="bottom-link">
+                        <a href="cadastro.html">Criar conta</a>
+                    </div>
+
+                    <div id="loginMessage" class="form-message" aria-live="polite"></div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script src="src/js/login.js"></script>
+</body>
+</html>
