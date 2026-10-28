@@ -1,6 +1,6 @@
 package servidor;
 
-import java.util.*;
+import java.util.ArrayList;
 
 public class Servidor {
     
@@ -21,7 +21,7 @@ public class Servidor {
 
     public static void main (String[] args) {
         if (args.length > 2) {
-            System.err.println("Uso esperado: java Servidor <PORTA> <MONGO_URI>\n");
+            System.err.println("Uso esperado: java Servidor [PORTA] [MONGO_URI]\n");
             System.err.println("Ou variaveis de ambiente: SERVIDOR_PORTA, MONGO_URI\n");
             return;
         }

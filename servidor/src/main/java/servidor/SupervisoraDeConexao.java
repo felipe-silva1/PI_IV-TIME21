@@ -1,14 +1,17 @@
 package servidor;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.ObjectInputFilter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.ArrayList;
 
 public class SupervisoraDeConexao extends Thread
 {
     // so estas classes podem ser desserializadas (protege contra objetos maliciosos)
     private static final String FILTRO =
-        "Comunicado;PedidoDeStatus;PedidoParaSair;!*";
+    "servidor.Comunicado;servidor.PedidoDeStatus;servidor.PedidoParaSair;" +
+    "servidor.PedidoDeInsercao;servidor.PedidoDeBusca;!*";
 
     private Parceiro               usuario;
     private Socket                 conexao;
@@ -117,6 +120,32 @@ public class SupervisoraDeConexao extends Thread
                                               ativas,
                                               System.currentTimeMillis(),
                                               this.repositorio.estaDisponivel()));
+                }
+                else if (comunicado instanceof PedidoDeInsercao)
+                {
+                    PedidoDeInsercao p = (PedidoDeInsercao)comunicado;
+                    try
+                    {
+                        this.repositorio.inserir (p.getColecao(), p.getDocumentoJson());
+                        this.usuario.receba (new RespostaDeOperacao (true, "ok", null));
+                    }
+                    catch (Exception erro)
+                    {
+                        this.usuario.receba (new RespostaDeOperacao (false, erro.getMessage(), null));
+                    }
+                }
+                else if (comunicado instanceof PedidoDeBusca)
+                {
+                    PedidoDeBusca p = (PedidoDeBusca)comunicado;
+                    try
+                    {
+                        this.usuario.receba (new RespostaDeOperacao (true, "ok",
+                            this.repositorio.buscar (p.getColecao(), p.getFiltroJson())));
+                    }
+                    catch (Exception erro)
+                    {
+                        this.usuario.receba (new RespostaDeOperacao (false, erro.getMessage(), null));
+                    }
                 }
                 else if (comunicado instanceof PedidoParaSair)
                     break;

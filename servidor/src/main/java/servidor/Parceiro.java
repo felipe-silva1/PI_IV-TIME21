@@ -1,7 +1,9 @@
 package servidor;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
 public class Parceiro
@@ -47,7 +49,8 @@ public class Parceiro
             synchronized (this.transmissor)
             {
                 this.transmissor.writeObject (x);
-                this.transmissor.flush       ();
+                this.transmissor.reset();
+                this.transmissor.flush();
             }
         }
         catch (IOException erro)
@@ -68,7 +71,7 @@ public class Parceiro
         }
         catch (Exception erro)
         {
-            throw new Exception ("Erro de recepcao");
+            throw new Exception ("Erro de recepcao", erro);
         }
         finally
         {
@@ -90,7 +93,7 @@ public class Parceiro
         }
         catch (Exception erro)
         {
-            throw new Exception ("Erro de recepcao");
+            throw new Exception ("Erro de recepcao", erro);
         }
         finally
         {

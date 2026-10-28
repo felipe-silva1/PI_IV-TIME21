@@ -8,6 +8,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -90,5 +91,20 @@ public class RepositorioDeChamadas
         }
         catch (Exception erro)
         {}
+    }
+    
+    public void inserir (String colecao, String json) throws Exception
+    {
+        this.banco.getCollection (colecao).insertOne (Document.parse (json));
+    }
+
+    public ArrayList<String> buscar (String colecao, String filtroJson) throws Exception
+    {
+        ArrayList<String> ret = new ArrayList<String> ();
+        for (Document d : this.banco.getCollection (colecao)
+                                    .find (Document.parse (filtroJson))
+                                    .limit (100))
+            ret.add (d.toJson());
+        return ret;
     }
 }
