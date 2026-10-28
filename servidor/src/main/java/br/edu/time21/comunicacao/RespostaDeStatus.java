@@ -1,6 +1,7 @@
-package servidor;
+package br.edu.time21.comunicacao;
 
-public class RespostaDeStatus extends Comunicado
+// resposta do PedidoDeStatus, usada no teste da M0
+public class RespostaDeStatus extends Resposta
 {
     private static final long serialVersionUID = 1L;
 
@@ -27,7 +28,7 @@ public class RespostaDeStatus extends Comunicado
 
     public String toString ()
     {
-        return "situacao="        + this.situacao        +
+        return "situacao="          + this.situacao        +
                ", conexoesAtivas="  + this.conexoesAtivas  +
                ", horaDoServidor="  + this.horaDoServidor  +
                ", bancoDisponivel=" + this.bancoDisponivel;

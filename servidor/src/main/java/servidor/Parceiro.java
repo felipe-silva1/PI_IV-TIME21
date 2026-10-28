@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.concurrent.Semaphore;
 
+import br.edu.time21.comunicacao.Comunicado;
+
 public class Parceiro
 {
     private Socket             conexao;

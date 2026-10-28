@@ -2,6 +2,8 @@ package servidor;
 
 import java.util.*;
 
+import br.edu.time21.comunicacao.ComunicadoDeDesligamento;
+
 public class Servidor {
     
     public static String PORTA_PADRAO = "3000";

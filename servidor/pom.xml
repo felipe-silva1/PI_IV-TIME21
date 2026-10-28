@@ -23,7 +23,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.5.0</version>
         <configuration>
-          <mainClass>Servidor</mainClass>
+          <mainClass>servidor.Servidor</mainClass>
         </configuration>
       </plugin>
     </plugins>
