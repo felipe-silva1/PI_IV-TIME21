@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GuiaVest - Login</title>
+<link rel="stylesheet" href="src/css/base.css">
+<link rel="stylesheet" href="src/css/acesso.css">
+<link rel="stylesheet" href="src/css/login.css">
+</head>
+<body>
+  <main class="janela">
+    <aside class="lateral">
+      <div class="logo">GuiaVest</div>
+      <div>
+        <h1>Sua rotina de estudos, organizada do seu jeito.</h1>
+        <p>Cronogramas personalizados, metas diárias e alertas para você não perder o ritmo até a prova.</p>
+        <ul>
+          <li>Cronograma gerado a partir do seu exame e datas</li>
+          <li>Acompanhe o progresso das metas em tempo real</li>
+          <li>Redistribua atrasos sem perder o fio da meada</li>
+        </ul>
+      </div>
+      <div class="rodape"></div>
+    </aside>
+
+    <section class="formulario">
+      <div class="caixa">
+
+        <form id="form-login" class="ativo" novalidate>
+          <h2>Entrar</h2>
+          <p class="sub">Continue de onde parou</p>
+
+          <label for="l-email">E-mail</label>
+          <input id="l-email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required>
+
+          <label for="l-senha">Senha</label>
+          <div class="senha">
+            <input id="l-senha" type="password" placeholder="Digite sua senha" autocomplete="current-password" required>
+            <button type="button" class="mostrar-senha" aria-label="Mostrar senha">Mostrar</button>
+          </div>
+
+          <p class="erro" id="l-erro" role="alert"></p>
+          <button class="principal" type="submit">Entrar</button>
+          <p class="sucesso" id="l-ok"></p>
+
+          <p class="troca">Ainda não tem conta? <button type="button" data-pagina="pages/cadastro.html">Criar conta</button></p>
+        </form>
+
+      </div>
+    </section>
+  </main>
+
+<script src="src/js/navegacao.js"></script>
+<script src="src/js/login.js"></script>
+</body>
+</html>

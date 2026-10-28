@@ -1,0 +1,56 @@
+/* Estrutura comum das páginas internas: topo, menu e área de conteúdo */
+.topo {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--espaco-4);
+  padding: var(--espaco-3) var(--espaco-5);
+  background: var(--card);
+  border-bottom: 1px solid var(--subfundo);
+}
+.logo { font-family: var(--fonte-titulo); font-weight: 700; font-size: 1.1rem; }
+
+.menu { display: flex; gap: var(--espaco-1); }
+.menu button {
+  padding: var(--espaco-2) var(--espaco-3);
+  background: none; border: 0; border-radius: var(--raio);
+  color: var(--texto-suave); font-weight: 500;
+}
+.menu button:hover, .menu button[aria-current="page"] { color: var(--texto); background: var(--subfundo); }
+
+.conteudo {
+  width: 100%; max-width: 1100px; margin: 0 auto;
+  padding: var(--espaco-6) var(--espaco-5);
+}
+.conteudo h1 { margin-bottom: var(--espaco-5); }
+.conteudo h1:has(+ .legenda) { margin-bottom: var(--espaco-2); }
+.conteudo .legenda { display: block; margin-bottom: var(--espaco-5); }
+
+/* Cards e botões se reorganizam sozinhos conforme a largura */
+.grade {
+  display: grid; gap: var(--espaco-4);
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+}
+
+.botao {
+  padding: var(--espaco-3) var(--espaco-4);
+  background: var(--subfundo); color: var(--texto);
+  border: 1px solid transparent; border-radius: var(--raio);
+  font-weight: 500; text-align: left;
+}
+.botao:hover { border-color: var(--azul-primario); }
+
+.menu button:focus-visible, .botao:focus-visible { outline: 2px solid var(--azul-primario); outline-offset: 2px; }
+
+@media (max-width: 760px) {
+  .topo { padding: var(--espaco-3) var(--espaco-4); }
+  .conteudo { padding: var(--espaco-5) var(--espaco-4); }
+
+  /* No celular o menu vira uma barra fixa no rodapé */
+  .menu {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    padding: var(--espaco-2);
+    padding-bottom: calc(var(--espaco-2) + env(safe-area-inset-bottom));
+    background: var(--card); border-top: 1px solid var(--subfundo);
+  }
+  .menu button { flex: 1; padding: var(--espaco-2) var(--espaco-1); font-size: .8125rem; text-align: center; }
+  body:has(.menu) .conteudo { padding-bottom: calc(var(--espaco-8) + var(--espaco-7)); }
+}
