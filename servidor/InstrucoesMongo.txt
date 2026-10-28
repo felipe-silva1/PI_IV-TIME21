@@ -1,0 +1,15 @@
+Para realizar a conexão com o banco, servidor precisa da variavel MONGO_URI (string de conexão mongoDB).
+
+A string pode ser inserida por meio de args ao rodar o programa, porém para facilitar é recomendado colocar sua string de conexão por variavel de ambiente:
+1- No atlas, é necessário permitir o IP da maquina que terá acesso ao banco
+2- Crie um usuario no mongoDB, na parte Database & Network Access. Lá, defina seu usuario e senha, e coloque um Built-in role: Read/Write to any database.
+3- Copie a sua string de conexão, com usuario e senha. Para defini-lá como variavel de ambiente use:
+
+    Windows powershell:
+        setx MONGO_URI "mongodb+srv://usuario:senha@cluster0.xxxxx.mongodb.net"
+
+    Linux:
+        Adicionar a ~/.bashrc:
+            export MONGO_URI='mongodb+srv://usuario:senha@cluster0.xxxxx.mongodb.net'
+
+Isso permitirá que você possa usar a mesma conection string toda vez sem ter que ficar colando ela ao rodar o servidor.
