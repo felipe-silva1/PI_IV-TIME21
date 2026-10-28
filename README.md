@@ -150,7 +150,9 @@ Quando as três partes estiverem prontas, a ordem de inicialização será: Mong
 | Servidor | a definir |
 | MongoDB | 27017 (padrão) |
 
-**Frontend:** abra `frontend/index.html` com o Live Server. A página consulta `http://localhost:8080/api/health` e mostra se o backend está disponível.
+**Frontend:** abra `frontend/index.html` com o Live Server. A página consulta
+`http://localhost:8080/api/health` e mostra separadamente se o servidor Java e
+o MongoDB estão disponíveis. O login fica em `frontend/pages/login.html`.
 
 ### Backend Spring Boot
 
@@ -169,14 +171,21 @@ Também é possível executá-lo pelo terminal, a partir da pasta `backend/backe
 .\mvnw.cmd spring-boot:run
 ```
 
-Com o backend em execução, teste a aplicação acessando [`http://localhost:8080/api/health`](http://localhost:8080/api/health). A resposta esperada é semelhante a:
+Com o backend, o servidor e o MongoDB em execução, teste a aplicação acessando [`http://localhost:8080/api/health`](http://localhost:8080/api/health). A resposta esperada é semelhante a:
 
 ```json
 {
   "status": "UP",
-  "mensagem": "Backend Spring Boot rodando na porta 8080!"
+  "mensagem": "Servidor e banco de dados disponiveis.",
+  "servidorDisponivel": true,
+  "bancoDisponivel": true
 }
 ```
+
+Se o servidor estiver desligado, o endpoint continua respondendo com
+`status: "DOWN"` e a tela inicial mostra a indisponibilidade sem interromper a
+interface. Se apenas o MongoDB estiver indisponível, o status será
+`"DEGRADED"` e o banco será indicado como indisponível.
 
 ### Servidor
 
