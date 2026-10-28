@@ -180,8 +180,6 @@ Com o backend em execução, teste a aplicação acessando [`http://localhost:80
 
 ### Servidor
 
-As instruções de execução do servidor de sockets serão adicionadas conforme essa parte for implementada.
-
 **Servidor**
 
 Servidor Java que recebe conexões do backend por socket, troca objetos com
@@ -205,7 +203,8 @@ no MongoDB (Atlas).
 | URI do MongoDB | 2º | `MONGO_URI` | `mongodb://localhost:27017` |
 
 O argumento tem prioridade sobre a variável de ambiente. **Não coloque a URI
-com senha no código nem no Git**: defina-a como variável de ambiente.
+com senha no código nem no Git**: defina-a como variável de ambiente no mesmo
+terminal em que o servidor será iniciado.
 
 ```bash
 # Linux / Mac
@@ -226,14 +225,71 @@ setx MONGO_URI "mongodb+srv://usuario:senha@cluster0.xxxxx.mongodb.net"
 ```
 
 No Atlas, o IP da máquina que roda o servidor precisa estar liberado em
-*Network Access*, e o usuário precisa de permissão `readWrite`.
+*Network Access*, e o usuário precisa ser um **Database User** com permissão
+`readWrite` no banco usado pelo servidor. A senha do Database User é diferente
+da senha da conta usada para entrar no site do Atlas.
+
+#### Usando MongoDB Atlas
+
+1. Acesse o projeto em [MongoDB Atlas](https://cloud.mongodb.com).
+2. No cluster, clique em **Connect** e depois em **Drivers**.
+3. Selecione **Java** e copie a URI exibida pelo Atlas.
+4. Em **Security > Database Access**, crie ou confirme o Database User.
+5. Em **Security > Network Access**, adicione o IP da máquina que executará o servidor.
+6. Substitua na URI apenas o usuário e a senha pelos dados do Database User.
+
+A URI deve conter o endereço real do cluster, e não um exemplo como
+`cluster0.xxxxx.mongodb.net`:
+
+```text
+mongodb+srv://usuario:senha@cluster0.endereco-real.mongodb.net/servidor
+```
+
+Se a senha tiver caracteres especiais, como `@`, `#`, `:` ou `/`, eles devem
+ser codificados na URI (`%40`, `%23`, `%3A` e `%2F`, respectivamente).
+
+No Windows PowerShell, defina a variável antes de iniciar o servidor. O valor
+fica disponível somente naquele terminal:
+
+```powershell
+$env:MONGO_URI='mongodb+srv://usuario:senha@cluster0.endereco-real.mongodb.net/servidor'
+```
+
+Para um MongoDB local, não defina `MONGO_URI`; o padrão usado será
+`mongodb://localhost:27017`. Nesse caso, o MongoDB precisa estar rodando na
+porta `27017`.
 
 ## Compilar e executar
 
+O módulo `servidor` não possui um `mvnw.cmd` próprio. No Windows, é possível
+usar o Maven Wrapper que está no módulo do backend, apontando-o para o
+`pom.xml` do servidor. Abra um terminal na pasta `servidor`:
+
+```powershell
+cd C:\programacao\PI_IV-TIME21\servidor
+
+# Se estiver usando Atlas, execute antes os comandos de configuração acima.
+& "..\backend\backend-api\mvnw.cmd" -f "pom.xml" compile
+& "..\backend\backend-api\mvnw.cmd" -f "pom.xml" exec:java -Dexec.args="3000"
+```
+
+O servidor deve mostrar:
+
+```text
+O servidor esta ativo na porta 3000
+```
+
+O processo fica aguardando comandos nesse terminal. Para encerrá-lo
+corretamente, digite `desativar` e pressione Enter.
+
+Se o Maven estiver instalado globalmente, os dois comandos equivalentes são
+`mvn compile` e `mvn exec:java -Dexec.args="3000"`.
+
+No Linux ou macOS, a forma equivalente, a partir da pasta `servidor`, é:
+
 ```bash
-mvn compile
-mvn exec:java -Dexec.args="3000"
-## Executar pelo VScode também funciona
+../backend/backend-api/mvnw -f pom.xml compile
+../backend/backend-api/mvnw -f pom.xml exec:java -Dexec.args="3000"
 ```
 
 ## Protocolo
@@ -273,12 +329,13 @@ gravação aparece no console e a resposta de status traz `bancoDisponivel=false
 
 ## Testando
 
-Com o servidor rodando, em outro terminal:
+Com o servidor rodando, abra outro terminal na pasta `servidor` e execute o
+cliente de teste. Ele simula o backend: envia um `PedidoDeStatus`, imprime a
+`RespostaDeStatus` recebida e envia um `PedidoParaSair`.
 
-```bash
-mvn compile
-java -cp target/classes servidor.ClienteDeTeste localhost 3000
-## Rodar ClienteDeTeste no VScode tambem funciona!
+```powershell
+cd C:\programacao\PI_IV-TIME21\servidor
+java -cp "target\classes" servidor.ClienteDeTeste localhost 3000
 ```
 
 Saída esperada:
@@ -287,8 +344,10 @@ Saída esperada:
 Resposta: situacao=ATIVO, conexoesAtivas=1, horaDoServidor=..., bancoDisponivel=true
 ```
 
-(No Windows, troque `:` por `;` no classpath.) O `ClienteDeTeste` é só uma
-ferramenta de verificação manual. O cliente real é o backend.
+O `ClienteDeTeste` é só uma ferramenta de verificação manual. O cliente real é
+o backend. Se o servidor não conseguir acessar o MongoDB, ele ainda poderá
+responder ao cliente, mas a saída indicará `bancoDisponivel=false` e a falha
+de gravação aparecerá no console do servidor.
 
 Para conferir a gravação, abra a coleção `chamadas` do banco `servidor` no
 Atlas.
