@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GuiaVest - Login</title>
-<link rel="stylesheet" href="src/css/base.css">
-<link rel="stylesheet" href="src/css/acesso.css">
-<link rel="stylesheet" href="src/css/login.css">
+<link rel="stylesheet" href="../src/css/base.css">
+<link rel="stylesheet" href="../src/css/acesso.css">
+<link rel="stylesheet" href="../src/css/login.css">
 </head>
 <body>
   <main class="janela">
@@ -26,32 +26,25 @@
 
     <section class="formulario">
       <div class="caixa">
-
         <form id="form-login" class="ativo" novalidate>
           <h2>Entrar</h2>
           <p class="sub">Continue de onde parou</p>
-
           <label for="l-email">E-mail</label>
           <input id="l-email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required>
-
           <label for="l-senha">Senha</label>
           <div class="senha">
             <input id="l-senha" type="password" placeholder="Digite sua senha" autocomplete="current-password" required>
             <button type="button" class="mostrar-senha" aria-label="Mostrar senha">Mostrar</button>
           </div>
-
           <p class="erro" id="l-erro" role="alert"></p>
           <button class="principal" type="submit">Entrar</button>
           <p class="sucesso" id="l-ok"></p>
-
-          <p class="troca">Ainda não tem conta? <button type="button" data-pagina="pages/cadastro.html">Criar conta</button></p>
+          <p class="troca">Ainda não tem conta? <button type="button" data-pagina="cadastro.html">Criar conta</button></p>
         </form>
-
       </div>
     </section>
   </main>
-
-<script src="src/js/navegacao.js"></script>
-<script src="src/js/login.js"></script>
+<script src="../src/js/navegacao.js"></script>
+<script src="../src/js/login.js"></script>
 </body>
 </html>

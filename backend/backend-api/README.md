@@ -30,6 +30,12 @@ Se o servidor estiver indisponível, `ClienteSocket.enviar` devolve uma
 `RespostaDeErro` com código `ERRO_INTERNO`; a exceção de rede é registrada no
 log e não chega a derrubar a API.
 
+O endpoint `GET /api/health` envia um `PedidoDeStatus` ao servidor. A resposta
+inclui `servidorDisponivel` e `bancoDisponivel`, permitindo que o frontend
+mostre o estado de toda a cadeia. Os estados possíveis são `UP` (servidor e
+MongoDB disponíveis), `DEGRADED` (servidor disponível, MongoDB indisponível) e
+`DOWN` (servidor indisponível).
+
 ## 🛠️ Como executar o projeto no VS Code
 
 1. Certifique-se de ter as extensões **Extension Pack for Java** e **Spring Boot Extension Pack** instaladas.
@@ -48,5 +54,8 @@ Você deverá ver uma resposta em JSON similar a:
 ```json
 {
   "status": "UP",
-  "mensagem": "Backend Spring Boot rodando na porta 8080!"
+  "mensagem": "Servidor e banco de dados disponiveis.",
+  "servidorDisponivel": true,
+  "bancoDisponivel": true
 }
+```
