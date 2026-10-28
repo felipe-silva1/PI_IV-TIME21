@@ -4,11 +4,18 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import br.edu.time21.comunicacao.*;
+
 public class SupervisoraDeConexao extends Thread
 {
-    // so estas classes podem ser desserializadas (protege contra objetos maliciosos)
+    // so as classes do protocolo podem ser desserializadas (protege contra
+    // objetos maliciosos). o padrao casa o nome TOTALMENTE QUALIFICADO, por
+    // isso o pacote precisa aparecer aqui; "!*" rejeita todo o resto.
+    // String nao precisa ser liberada (vai no stream como TC_STRING, sem
+    // descritor de classe), mas qualquer novo tipo de campo (Date, List,
+    // classe de modelo) tem de ser acrescentado a este filtro.
     private static final String FILTRO =
-        "Comunicado;PedidoDeStatus;PedidoParaSair;!*";
+        "br.edu.time21.comunicacao.*;!*";
 
     private Parceiro               usuario;
     private Socket                 conexao;
@@ -120,6 +127,17 @@ public class SupervisoraDeConexao extends Thread
                 }
                 else if (comunicado instanceof PedidoParaSair)
                     break;
+                else
+                {
+                    // classe do protocolo, mas sem tratamento nesta versao
+                    this.repositorio.registrar ("PEDIDO_DESCONHECIDO", origem,
+                                                comunicado.getClass().getName());
+
+                    this.usuario.receba (
+                        new RespostaDeErro (RespostaDeErro.PEDIDO_DESCONHECIDO,
+                                            "O servidor nao trata " +
+                                            comunicado.getClass().getSimpleName()));
+                }
             }
         }
         catch (Exception erro)

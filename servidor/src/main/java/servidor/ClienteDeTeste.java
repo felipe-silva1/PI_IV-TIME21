@@ -3,6 +3,10 @@ package servidor;
 import java.io.*;
 import java.net.*;
 
+import br.edu.time21.comunicacao.Comunicado;
+import br.edu.time21.comunicacao.PedidoDeStatus;
+import br.edu.time21.comunicacao.PedidoParaSair;
+
 // Simula o backend: java ClienteDeTeste [HOST] [PORTA]
 public class ClienteDeTeste
 {

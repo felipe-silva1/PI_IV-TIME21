@@ -56,6 +56,52 @@ Backend e servidor trocam objetos Java serializados. Para que isso funcione:
 - As classes trocadas devem implementar `Serializable` e existir **idênticas** nos dois projetos: mesmo pacote, mesmo nome e mesmos campos.
 - Em cada lado da conexão, o `ObjectOutputStream` deve ser criado e esvaziado com `flush()` **antes** do `ObjectInputStream`. Na ordem inversa, os dois lados ficam esperando um pelo outro.
 
+#### Pacote das classes de comunicação
+
+As mensagens do protocolo ficam todas no pacote **`br.edu.time21.comunicacao`**, separado do pacote `servidor`, que guarda só a infraestrutura (`Servidor`, `AceitadoraDeConexao`, `SupervisoraDeConexao`, `Parceiro`, `RepositorioDeChamadas` e `Teclado`).
+
+A hierarquia tem uma raiz e duas bases, uma para cada sentido da conversa:
+
+```text
+Comunicado                       raiz, implements Serializable
+|-- Pedido                       backend -> servidor
+|   |-- PedidoDeStatus
+|   `-- PedidoParaSair
+`-- Resposta                     servidor -> backend
+    |-- RespostaDeStatus
+    |-- RespostaDeErro
+    `-- ComunicadoDeDesligamento
+```
+
+Toda classe do protocolo declara o próprio `serialVersionUID = 1L`. Isso é obrigatório, e não só uma convenção: o `serialVersionUID` **não é herdado** para efeito de serialização. Sem a declaração, a JVM calcula um valor a partir da assinatura da classe, e aí qualquer alteração de campo faz o outro lado rejeitar a mensagem com `InvalidClassException`.
+
+#### Como as duas cópias são mantidas iguais
+
+A decisão do time foi **duplicar os arquivos**, em vez de criar um módulo Maven compartilhado. Assim cada um continua abrindo `servidor/` e `backend/backend-api/` direto na IDE, sem precisar rodar um `mvn install` de um terceiro módulo antes de compilar qualquer um dos dois.
+
+Os mesmos oito arquivos existem em:
+
+- `servidor/src/main/java/br/edu/time21/comunicacao/`
+- `backend/backend-api/src/main/java/br/edu/time21/comunicacao/`
+
+**Regra do time: quem mexer no protocolo mexe nos dois lados, no mesmo commit.** O custo dessa escolha é esse — não há nada no build que impeça as cópias de divergirem, e uma divergência só aparece em tempo de execução, como erro de desserialização. Antes de abrir o PR, confira que as pastas estão idênticas:
+
+```bash
+# Linux / Mac / Git Bash
+diff -r servidor/src/main/java/br/edu/time21/comunicacao \
+        backend/backend-api/src/main/java/br/edu/time21/comunicacao
+```
+
+```powershell
+# Windows (PowerShell)
+Compare-Object `
+  (Get-ChildItem -Recurse servidor\src\main\java\br\edu\time21\comunicacao | Get-FileHash) `
+  (Get-ChildItem -Recurse backend\backend-api\src\main\java\br\edu\time21\comunicacao | Get-FileHash) `
+  -Property Hash
+```
+
+Sem nenhuma saída, as cópias estão iguais.
+
 ## Tecnologias
 
 | Parte | Tecnologias |
@@ -76,7 +122,13 @@ PI_IV-TIME21/
 |       |-- css/styles.css
 |       `-- js/app.js
 |-- backend/           API em Java (em desenvolvimento)
+|   `-- backend-api/src/main/java/
+|       |-- com/guiavest/backend_api/      API Spring Boot
+|       `-- br/edu/time21/comunicacao/     classes do protocolo (copia)
 |-- servidor/          servidor de sockets em Java + MongoDB (em desenvolvimento)
+|   `-- src/main/java/
+|       |-- servidor/                      infraestrutura do servidor
+|       `-- br/edu/time21/comunicacao/     classes do protocolo (copia)
 |-- .gitignore
 `-- README.md
 ```
@@ -186,19 +238,31 @@ mvn exec:java -Dexec.args="3000"
 
 ## Protocolo
 
-Todas as mensagens herdam de `Comunicado` e são serializadas com
-`ObjectOutputStream`. O backend precisa ter as mesmas classes, com o mesmo
-nome e o mesmo `serialVersionUID`.
+Todas as mensagens herdam de `Comunicado`, no pacote
+`br.edu.time21.comunicacao`, e são serializadas com `ObjectOutputStream`. O
+backend precisa ter as mesmas classes, com o mesmo pacote, o mesmo nome e o
+mesmo `serialVersionUID` — veja *Comunicação entre backend e servidor*.
 
-| Mensagem | Sentido | Descrição |
-|---|---|---|
-| `PedidoDeStatus` | cliente → servidor | Pergunta se o servidor está ativo |
-| `RespostaDeStatus` | servidor → cliente | Situação, conexões ativas, hora do servidor e se o MongoDB responde |
-| `PedidoParaSair` | cliente → servidor | Encerra a conexão do cliente |
-| `ComunicadoDeDesligamento` | servidor → cliente | Aviso de que o servidor foi desativado |
+| Mensagem | Base | Sentido | Descrição |
+|---|---|---|---|
+| `PedidoDeStatus` | `Pedido` | cliente → servidor | Pergunta se o servidor está ativo |
+| `PedidoParaSair` | `Pedido` | cliente → servidor | Encerra a conexão do cliente |
+| `RespostaDeStatus` | `Resposta` | servidor → cliente | Situação, conexões ativas, hora do servidor e se o MongoDB responde |
+| `RespostaDeErro` | `Resposta` | servidor → cliente | Código e mensagem de diagnóstico, quando o pedido não pôde ser atendido |
+| `ComunicadoDeDesligamento` | `Resposta` | servidor → cliente | Aviso de que o servidor foi desativado |
 
-O servidor só aceita desserializar as classes do protocolo (filtro em
-`SupervisoraDeConexao`).
+Os códigos previstos na `RespostaDeErro` são `PEDIDO_DESCONHECIDO`,
+`PEDIDO_INVALIDO`, `BANCO_INDISPONIVEL` e `ERRO_INTERNO`. O backend decide o
+que devolver ao frontend a partir do código; a mensagem é só para log e
+diagnóstico, e não deve ser mostrada crua ao usuário final.
+
+O servidor só aceita desserializar as classes do protocolo: o filtro em
+`SupervisoraDeConexao` é `br.edu.time21.comunicacao.*;!*`. O padrão casa o
+**nome totalmente qualificado**, e é por isso que o pacote aparece nele. Campos
+`String` não precisam ser liberados, porque vão no stream como `TC_STRING`, sem
+descritor de classe; mas qualquer novo tipo de campo (`Date`, `List`, classes
+de modelo) tem de ser acrescentado ao filtro, senão o pedido passa a ser
+rejeitado na recepção.
 
 ## Registro no MongoDB
 
@@ -212,8 +276,8 @@ gravação aparece no console e a resposta de status traz `bancoDisponivel=false
 Com o servidor rodando, em outro terminal:
 
 ```bash
-mvn test-compile
-java -cp target/classes:target/test-classes ClienteDeTeste localhost 3000
+mvn compile
+java -cp target/classes servidor.ClienteDeTeste localhost 3000
 ## Rodar ClienteDeTeste no VScode tambem funciona!
 ```
 
