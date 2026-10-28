@@ -1,0 +1,17 @@
+/* Cards menores que a grade padrão: 5 por linha no computador, 2 no celular */
+.grade { grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); }
+
+.button-exam {
+  display: flex; align-items: flex-end;
+  min-height: 140px;
+  padding: var(--espaco-5);
+  background: var(--card); color: var(--texto);
+  border: 1.5px solid var(--premium); border-radius: var(--raio-grande);
+  font-family: var(--fonte-titulo); font-size: 1.25rem; font-weight: 600; text-align: left;
+}
+.button-exam:hover { background: var(--subfundo); }
+.button-exam:focus-visible { outline: 2px solid var(--azul-primario); outline-offset: 2px; }
+
+@media (max-width: 760px) {
+  .button-exam { min-height: 96px; padding: var(--espaco-4); }
+}

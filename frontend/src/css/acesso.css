@@ -1,0 +1,89 @@
+/* A janela ocupa a tela inteira: painel estreito da marca à esquerda, formulário em destaque */
+.janela {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: clamp(260px, 24vw, 360px) 1fr;
+  background: var(--fundo);
+}
+
+/* Lado esquerdo */
+.lateral {
+  background: var(--fundo-secundario);
+  padding: var(--espaco-7) var(--espaco-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.logo { font-family: var(--fonte-titulo); font-weight: 700; font-size: 1.1rem; }
+.lateral h1 { font-size: 1.6rem; line-height: 1.25; margin-bottom: var(--espaco-4); }
+.lateral p { font-size: .85rem; line-height: 1.5; color: var(--texto-suave); margin-bottom: var(--espaco-5); }
+.lateral ul { list-style: none; display: grid; gap: var(--espaco-3); font-size: .8rem; font-weight: 500; }
+.lateral .rodape { height: 1px; }
+
+/* Lado direito */
+.formulario {
+  display: grid;
+  place-items: center;
+  padding: var(--espaco-7) var(--espaco-6);
+}
+.caixa { width: 100%; max-width: 340px; }
+.caixa h2 { font-size: 1.5rem; margin-bottom: var(--espaco-1); }
+.caixa .sub { font-size: .75rem; color: var(--texto-suave); margin-bottom: var(--espaco-5); }
+
+form { display: none; }
+form.ativo { display: block; }
+
+label { display: block; font-size: .8rem; font-weight: 500; margin: var(--espaco-4) 0 var(--espaco-2); }
+input {
+  width: 100%;
+  padding: var(--espaco-3) var(--espaco-4);
+  background: var(--fundo);
+  border: 1px solid var(--subfundo);
+  border-radius: var(--raio);
+  color: var(--texto);
+  font: inherit;
+  font-size: .85rem;
+}
+input::placeholder { color: var(--texto-suave); }
+input:focus-visible { outline: 2px solid var(--azul-primario); outline-offset: 1px; border-color: transparent; }
+input[aria-invalid="true"] { border-color: var(--vermelho-escuro); }
+.erro { font-size: .75rem; min-height: 1.1em; margin-top: var(--espaco-2); }
+.erro:not(:empty) { padding: var(--espaco-2) var(--espaco-3); border-radius: var(--raio); background: var(--vermelho-escuro); color: var(--texto); }
+
+button.principal {
+  width: 100%;
+  margin-top: var(--espaco-5);
+  padding: var(--espaco-3);
+  background: var(--azul-primario);
+  color: var(--texto);
+  border: 0;
+  border-radius: var(--raio);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s;
+}
+button.principal:hover { filter: brightness(1.1); }
+button.principal:focus-visible { outline: 2px solid var(--texto); outline-offset: 2px; }
+
+.troca { text-align: center; margin-top: var(--espaco-5); font-size: .78rem; color: var(--texto-suave); }
+.troca button, .troca a {
+  background: none; border: 0; font: inherit; font-weight: 500;
+  color: var(--azul-primario); cursor: pointer; text-decoration: underline;
+}
+.sucesso { margin-top: var(--espaco-3); font-size: .8rem; color: var(--sucesso); min-height: 1.2em; text-align: center; }
+
+@media (max-width: 760px) {
+  .janela { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .formulario { padding: var(--espaco-6) var(--espaco-5); place-items: start center; }
+  input { font-size: 1rem; } /* abaixo de 16px o iPhone dá zoom ao focar o campo */
+  .lateral { padding: var(--espaco-6) var(--espaco-5); gap: var(--espaco-6); }
+  .lateral ul, .lateral p { display: none; }
+  .lateral h1 { margin: 0; font-size: 1.2rem; }
+}
+
+@media (max-width: 480px) {
+  .lateral { padding: var(--espaco-5) var(--espaco-4); gap: var(--espaco-4); }
+  .formulario { padding: var(--espaco-5) var(--espaco-4); }
+}

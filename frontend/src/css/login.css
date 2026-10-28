@@ -1,0 +1,9 @@
+/* Layout e formulário vêm do acesso.css; aqui só o que é exclusivo do login */
+.senha { position: relative; }
+.senha input { padding-right: 78px; }
+.mostrar-senha {
+  position: absolute; top: 50%; right: var(--espaco-3); transform: translateY(-50%);
+  background: none; border: 0; font: inherit; font-size: .75rem; font-weight: 500;
+  color: var(--texto-suave); cursor: pointer;
+}
+.mostrar-senha:hover { color: var(--texto); }

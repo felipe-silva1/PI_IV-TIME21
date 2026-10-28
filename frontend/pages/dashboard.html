@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GuiaVest - Dashboard</title>
+    <link rel="stylesheet" href="../src/css/base.css">
+    <link rel="stylesheet" href="../src/css/layout.css">
+</head>
+<body>
+    <header class="topo">
+        <div class="logo">GuiaVest</div>
+        <nav class="menu" aria-label="Navegação principal">
+            <button type="button" data-pagina="dashboard.html" aria-current="page">Painel</button>
+            <button type="button" data-pagina="cronograma.html">Cronograma</button>
+            <button type="button" data-pagina="metas.html">Metas</button>
+            <button type="button" data-pagina="lembretes.html">Lembretes</button>
+        </nav>
+    </header>
+
+    <main class="conteudo">
+        <h1>Painel</h1>
+        <div class="grade">
+            <button type="button" class="botao" data-pagina="lembretes.html">Lembretes</button>
+            <button type="button" class="botao" data-pagina="metas.html">Metas de hoje</button>
+            <button type="button" class="botao" data-pagina="cronograma.html">Ver cronograma completo</button>
+        </div>
+    </main>
+
+    <script src="../src/js/navegacao.js"></script>
+</body>
+</html>
