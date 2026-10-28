@@ -45,7 +45,7 @@ MongoDB
 ```
 
 - **frontend:** telas da aplicação em HTML, CSS e JavaScript. Conversa somente com o backend, por requisições HTTP com JSON.
-- **backend:** API consumida pelo frontend. Recebe as requisições, valida os dados, aplica as regras de negócio e pede ao servidor o que precisa ser lido ou gravado. O framework ainda será definido: Spring Boot ou Java puro.
+- **backend:** API Spring Boot consumida pelo frontend. Recebe as requisições, valida os dados, aplica as regras de negócio e pede ao servidor o que precisa ser lido ou gravado.
 - **servidor:** servidor de sockets em Java, feito do zero com `ServerSocket`, `ObjectInputStream` e `ObjectOutputStream`. É a única parte do sistema que acessa o banco de dados.
 - **MongoDB:** banco de dados com usuários, rotinas, cronogramas e progresso.
 
@@ -61,7 +61,7 @@ Backend e servidor trocam objetos Java serializados. Para que isso funcione:
 | Parte | Tecnologias |
 | --- | --- |
 | Frontend | HTML, CSS, JavaScript |
-| Backend | Java (framework a definir) |
+| Backend | Java, Spring Boot |
 | Servidor | Java, sockets TCP, `ObjectInputStream`/`ObjectOutputStream` |
 | Banco de dados | MongoDB |
 | Prototipação | Figma |
@@ -100,7 +100,35 @@ Quando as três partes estiverem prontas, a ordem de inicialização será: Mong
 
 **Frontend:** abra `frontend/index.html` com o Live Server. A página consulta `http://localhost:8080/api/health` e mostra se o backend está disponível.
 
-**Backend e servidor:** as instruções serão adicionadas aqui conforme cada parte for implementada.
+### Backend Spring Boot
+
+O backend funciona como intermediário entre o frontend e o servidor Java via socket. Para executá-lo pelo VS Code:
+
+1. Certifique-se de ter as extensões **Extension Pack for Java** e **Spring Boot Extension Pack** instaladas.
+2. Abra a pasta `backend/backend-api/` no VS Code.
+3. Aguarde o Maven carregar as dependências. O progresso pode ser acompanhado na barra inferior.
+4. Abra a classe `BackendApiApplication.java`, que contém a anotação `@SpringBootApplication`.
+5. Clique em **Run** acima do método `main` ou use o **Spring Boot Dashboard** na barra lateral.
+6. O backend será iniciado na porta `8080`.
+
+Também é possível executá-lo pelo terminal, a partir da pasta `backend/backend-api/`:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+Com o backend em execução, teste a aplicação acessando [`http://localhost:8080/api/health`](http://localhost:8080/api/health). A resposta esperada é semelhante a:
+
+```json
+{
+  "status": "UP",
+  "mensagem": "Backend Spring Boot rodando na porta 8080!"
+}
+```
+
+### Servidor
+
+As instruções de execução do servidor de sockets serão adicionadas conforme essa parte for implementada.
 
 ## Equipe
 
