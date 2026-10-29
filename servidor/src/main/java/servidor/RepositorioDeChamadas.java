@@ -6,7 +6,11 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import org.bson.Document;
+import org.bson.types.ObjectId;
+import com.mongodb.MongoWriteException;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +24,7 @@ public class RepositorioDeChamadas
     private MongoClient               cliente;
     private MongoDatabase             banco;
     private MongoCollection<Document> colecao;
+    private MongoCollection<Document> usuarios;
 
     public RepositorioDeChamadas (String uri, String nomeDoBanco)
     throws Exception
@@ -43,11 +48,39 @@ public class RepositorioDeChamadas
             this.cliente = MongoClients.create (configuracao);
             this.banco   = this.cliente.getDatabase (nomeDoBanco);
             this.colecao = this.banco.getCollection (RepositorioDeChamadas.COLECAO_PADRAO);
+            this.usuarios = this.banco.getCollection ("usuarios");
         }
         catch (Exception erro)
         {
             throw new Exception ("URI do MongoDB invalida");
         }
+    }
+
+    public String cadastrarUsuario(String nome, String email, String senhaHash)
+    {
+        this.usuarios.createIndex(Indexes.ascending("email"),
+                                  new IndexOptions().unique(true));
+        Document usuario = new Document("nome", nome)
+                .append("email", email)
+                .append("senhaHash", senhaHash)
+                .append("criadoEm", new Date());
+
+        try
+        {
+            this.usuarios.insertOne(usuario);
+            return ((ObjectId) usuario.get("_id")).toHexString();
+        }
+        catch (MongoWriteException erro)
+        {
+            if (erro.getError().getCode() == 11000)
+                return null;
+            throw erro;
+        }
+    }
+
+    public Document buscarUsuario(String email)
+    {
+        return this.usuarios.find(new Document("email", email)).first();
     }
 
     public void registrar (String tipo, String origem, String detalhes)

@@ -125,6 +125,71 @@ public class SupervisoraDeConexao extends Thread
                                               System.currentTimeMillis(),
                                               this.repositorio.estaDisponivel()));
                 }
+                else if (comunicado instanceof PedidoDeCadastro pedido)
+                {
+                    if (pedido.getNome() == null || pedido.getNome().isBlank()
+                            || pedido.getEmail() == null || pedido.getEmail().isBlank()
+                            || pedido.getSenhaHash() == null || pedido.getSenhaHash().isBlank())
+                    {
+                        this.usuario.receba(new RespostaDeErro(
+                                RespostaDeErro.PEDIDO_INVALIDO,
+                                "Dados de cadastro invalidos"));
+                        continue;
+                    }
+
+                    try
+                    {
+                        String usuarioId = this.repositorio.cadastrarUsuario(
+                                pedido.getNome(), pedido.getEmail(), pedido.getSenhaHash());
+                        this.usuario.receba(new RespostaDeConta(
+                                usuarioId == null ? RespostaDeConta.EMAIL_EM_USO
+                                                  : RespostaDeConta.OK,
+                                usuarioId, pedido.getNome(), null));
+                    }
+                    catch (Exception erro)
+                    {
+                        System.err.println("Falha ao criar conta no MongoDB: "
+                                + erro.getMessage());
+                        this.usuario.receba(new RespostaDeConta(
+                                RespostaDeConta.BANCO_INDISPONIVEL, null, null, null));
+                    }
+                }
+                else if (comunicado instanceof PedidoDeLogin pedido)
+                {
+                    if (pedido.getEmail() == null || pedido.getEmail().isBlank())
+                    {
+                        this.usuario.receba(new RespostaDeErro(
+                                RespostaDeErro.PEDIDO_INVALIDO,
+                                "E-mail de login invalido"));
+                        continue;
+                    }
+
+                    try
+                    {
+                        org.bson.Document usuario =
+                                this.repositorio.buscarUsuario(pedido.getEmail());
+                        if (usuario == null)
+                        {
+                            this.usuario.receba(new RespostaDeConta(
+                                    RespostaDeConta.NAO_ENCONTRADO, null, null, null));
+                        }
+                        else
+                        {
+                            this.usuario.receba(new RespostaDeConta(
+                                    RespostaDeConta.OK,
+                                    ((org.bson.types.ObjectId) usuario.get("_id")).toHexString(),
+                                    usuario.getString("nome"),
+                                    usuario.getString("senhaHash")));
+                        }
+                    }
+                    catch (Exception erro)
+                    {
+                        System.err.println("Falha ao consultar conta no MongoDB: "
+                                + erro.getMessage());
+                        this.usuario.receba(new RespostaDeConta(
+                                RespostaDeConta.BANCO_INDISPONIVEL, null, null, null));
+                    }
+                }
                 else if (comunicado instanceof PedidoParaSair)
                     break;
                 else

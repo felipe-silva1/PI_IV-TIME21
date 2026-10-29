@@ -187,6 +187,20 @@ Se o servidor estiver desligado, o endpoint continua respondendo com
 interface. Se apenas o MongoDB estiver indisponível, o status será
 `"DEGRADED"` e o banco será indicado como indisponível.
 
+### Cadastro, login e sessão
+
+O backend oferece `POST /api/auth/register` e `POST /api/auth/login`, ambos
+recebendo JSON. O cadastro exige `nome`, `email` e `senha`; a confirmação de
+senha é validada no navegador. Contas são armazenadas na coleção `usuarios` do
+banco `servidor`, com senha protegida por BCrypt. O login responde com um token
+de sessão; o frontend o mantém em `sessionStorage` e pode enviá-lo nas próximas
+requisições como `Authorization: Bearer <token>`. `GET /api/auth/session`
+valida o token e `DELETE /api/auth/session` encerra a sessão.
+
+As sessões expiram após 24 horas e são mantidas em memória pela API; reiniciar
+a API invalida as sessões existentes. Para testar cadastro e login, o MongoDB,
+o servidor de sockets e o backend precisam estar ativos.
+
 ### Servidor
 
 **Servidor**
