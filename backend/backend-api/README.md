@@ -36,6 +36,19 @@ mostre o estado de toda a cadeia. Os estados possíveis são `UP` (servidor e
 MongoDB disponíveis), `DEGRADED` (servidor disponível, MongoDB indisponível) e
 `DOWN` (servidor indisponível).
 
+## Cadastro e login
+
+A API implementa `POST /api/auth/register` (JSON com `nome`, `email` e `senha`)
+e `POST /api/auth/login` (JSON com `email` e `senha`). A confirmação de senha
+fica na validação do formulário. As contas são persistidas pelo servidor na
+coleção `usuarios`; a API armazena somente o hash BCrypt da senha. Sucesso
+retorna um token opaco, o identificador do estudante e seu nome.
+
+O frontend guarda o token em `sessionStorage`. Requisições autenticadas podem
+usar `Authorization: Bearer <token>`; `GET /api/auth/session` verifica o token
+e `DELETE /api/auth/session` encerra a sessão. Os tokens expiram em 24 horas e
+são invalidados quando a API reinicia.
+
 ## 🛠️ Como executar o projeto no VS Code
 
 1. Certifique-se de ter as extensões **Extension Pack for Java** e **Spring Boot Extension Pack** instaladas.
