@@ -67,8 +67,5 @@ Você deverá ver uma resposta em JSON similar a:
 ```json
 {
   "status": "UP",
-  "mensagem": "Servidor e banco de dados disponiveis.",
-  "servidorDisponivel": true,
-  "bancoDisponivel": true
+  "mensagem": "Backend Spring Boot rodando na porta 8080!"
 }
-```
