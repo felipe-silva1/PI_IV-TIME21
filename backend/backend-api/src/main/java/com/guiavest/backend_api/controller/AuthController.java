@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,17 +35,18 @@ public class AuthController
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> cadastrar(@RequestBody AuthRequest request)
+    public ResponseEntity<?> cadastrar(@RequestBody(required = false) AuthRequest request)
     {
+        String email = request == null ? null : normalizarEmail(request.email());
         if (request == null || request.nome() == null || request.nome().isBlank()
-                || request.email() == null || !emailValido(request.email())
+                || !emailValido(email)
                 || request.senha() == null || request.senha().length() < 8
                 || !AuthService.senhaValidaParaHash(request.senha()))
             return ResponseEntity.badRequest().body(Map.of(
                     "message", "Confira nome, e-mail e senha (mínimo de 8 caracteres)."));
 
         RespostaDeConta conta = this.authService.cadastrar(
-                request.nome().trim(), request.email().trim().toLowerCase(),
+                request.nome().trim(), email,
                 request.senha());
         if (RespostaDeConta.EMAIL_EM_USO.equals(conta.getCodigo()))
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -58,14 +60,14 @@ public class AuthController
     }
 
     @PostMapping("/login")
-    public AuthSessionResponse entrar(@RequestBody AuthRequest request)
+    public AuthSessionResponse entrar(@RequestBody(required = false) AuthRequest request)
     {
-        if (request == null || request.email() == null || !emailValido(request.email())
-                || request.senha() == null || request.senha().isBlank())
+        String email = request == null ? null : normalizarEmail(request.email());
+        if (!emailValido(email) || request.senha() == null || request.senha().isBlank()
+                || !AuthService.senhaValidaParaHash(request.senha()))
             throw new AuthException(400, "Informe um e-mail e uma senha válidos.");
 
-        return this.authService.entrar(request.email().trim().toLowerCase(),
-                                       request.senha());
+        return this.authService.entrar(email, request.senha());
     }
 
     @GetMapping("/session")
@@ -95,7 +97,12 @@ public class AuthController
 
     private static boolean emailValido(String email)
     {
-        return email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+        return email != null && email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    }
+
+    private static String normalizarEmail(String email)
+    {
+        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
     }
 
     private static String token(String authorization)
