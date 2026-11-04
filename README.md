@@ -66,11 +66,22 @@ A hierarquia tem uma raiz e duas bases, uma para cada sentido da conversa:
 Comunicado                       raiz, implements Serializable
 |-- Pedido                       backend -> servidor
 |   |-- PedidoDeStatus
-|   `-- PedidoParaSair
+|   |-- PedidoParaSair
+|   |-- PedidoParaSalvarRotina
+|   `-- PedidoParaBuscarRotina
 `-- Resposta                     servidor -> backend
     |-- RespostaDeStatus
     |-- RespostaDeErro
+    |-- RespostaDeRotina
     `-- ComunicadoDeDesligamento
+```
+
+Algumas classes do pacote não são mensagens, e sim dados que viajam dentro
+delas. Elas implementam `Serializable` direto, sem herdar de `Comunicado`:
+
+```text
+Rotina                           documento da coleção perfis
+`-- TurnoLivre                   um item de Rotina.disponibilidade
 ```
 
 Toda classe do protocolo declara o próprio `serialVersionUID = 1L`. Isso é obrigatório, e não só uma convenção: o `serialVersionUID` **não é herdado** para efeito de serialização. Sem a declaração, a JVM calcula um valor a partir da assinatura da classe, e aí qualquer alteração de campo faz o outro lado rejeitar a mensagem com `InvalidClassException`.
@@ -79,7 +90,7 @@ Toda classe do protocolo declara o próprio `serialVersionUID = 1L`. Isso é obr
 
 A decisão do time foi **duplicar os arquivos**, em vez de criar um módulo Maven compartilhado. Assim cada um continua abrindo `servidor/` e `backend/backend-api/` direto na IDE, sem precisar rodar um `mvn install` de um terceiro módulo antes de compilar qualquer um dos dois.
 
-Os mesmos oito arquivos existem em:
+Os mesmos arquivos existem em:
 
 - `servidor/src/main/java/br/edu/time21/comunicacao/`
 - `backend/backend-api/src/main/java/br/edu/time21/comunicacao/`
@@ -213,6 +224,8 @@ no MongoDB (Atlas).
 - Em cada conexão, cria o `ObjectOutputStream`, chama `flush()` e só depois
   cria o `ObjectInputStream`.
 - Responde ao `PedidoDeStatus` com uma `RespostaDeStatus`.
+- Salva e busca a rotina do estudante na coleção `perfis` do banco `guiavest`
+  (veja `docs/dicionario-banco.md`).
 - Continua no ar quando um cliente encerra ou derruba a conexão.
 - Grava cada evento na coleção `chamadas` do banco `servidor`.
 
@@ -325,9 +338,32 @@ mesmo `serialVersionUID` — veja *Comunicação entre backend e servidor*.
 |---|---|---|---|
 | `PedidoDeStatus` | `Pedido` | cliente → servidor | Pergunta se o servidor está ativo |
 | `PedidoParaSair` | `Pedido` | cliente → servidor | Encerra a conexão do cliente |
+| `PedidoParaSalvarRotina` | `Pedido` | cliente → servidor | Cria a rotina do usuário ou substitui a existente |
+| `PedidoParaBuscarRotina` | `Pedido` | cliente → servidor | Busca a rotina pelo id do usuário |
 | `RespostaDeStatus` | `Resposta` | servidor → cliente | Situação, conexões ativas, hora do servidor e se o MongoDB responde |
+| `RespostaDeRotina` | `Resposta` | servidor → cliente | A rotina gravada ou encontrada; `null` na busca de um usuário que ainda não tem rotina |
 | `RespostaDeErro` | `Resposta` | servidor → cliente | Código e mensagem de diagnóstico, quando o pedido não pôde ser atendido |
 | `ComunicadoDeDesligamento` | `Resposta` | servidor → cliente | Aviso de que o servidor foi desativado |
+
+### Rotina
+
+A `Rotina` corresponde a um documento da coleção `perfis`: `usuarioId` (o
+`ObjectId` do usuário em hexadecimal), `vestibular`, `disponibilidade` (lista
+de `TurnoLivre`, cada um com `diaSemana` de 1 a 7 e `turno` `MANHA`, `TARDE`
+ou `NOITE`), `materiasPrioritarias` (da maior para a menor prioridade) e
+`atualizadoEm`. O backend monta a rotina sem `atualizadoEm`; o servidor
+preenche esse campo ao gravar e devolve a rotina como ficou no banco.
+
+Salvar é sempre uma substituição completa: se o usuário já tem rotina, o
+documento inteiro é trocado (o `_id` é mantido). O servidor cria, ao iniciar,
+o índice único em `usuarioId`, que garante um perfil por usuário.
+
+Antes de gravar, o servidor confere as regras do dicionário de dados e
+responde `PEDIDO_INVALIDO` se alguma falhar: `usuarioId` válido, vestibular
+preenchido, ao menos um turno, `diaSemana` entre 1 e 7, turno conhecido, sem
+par (`diaSemana`, `turno`) repetido, ao menos uma matéria e sem matéria
+repetida. A validação voltada ao usuário (vestibular existente, matérias do
+vestibular, mensagens para a tela) continua sendo papel do backend.
 
 Os códigos previstos na `RespostaDeErro` são `PEDIDO_DESCONHECIDO`,
 `PEDIDO_INVALIDO`, `BANCO_INDISPONIVEL` e `ERRO_INTERNO`. O backend decide o
@@ -335,19 +371,37 @@ que devolver ao frontend a partir do código; a mensagem é só para log e
 diagnóstico, e não deve ser mostrada crua ao usuário final.
 
 O servidor só aceita desserializar as classes do protocolo: o filtro em
-`SupervisoraDeConexao` é `br.edu.time21.comunicacao.*;!*`. O padrão casa o
-**nome totalmente qualificado**, e é por isso que o pacote aparece nele. Campos
-`String` não precisam ser liberados, porque vão no stream como `TC_STRING`, sem
-descritor de classe; mas qualquer novo tipo de campo (`Date`, `List`, classes
-de modelo) tem de ser acrescentado ao filtro, senão o pedido passa a ser
-rejeitado na recepção.
+`SupervisoraDeConexao` é
+`br.edu.time21.comunicacao.*;java.util.ArrayList;java.lang.Object;!*`. O
+padrão casa o **nome totalmente qualificado**, e é por isso que o pacote
+aparece nele. Campos `String` não precisam ser liberados, porque vão no stream
+como `TC_STRING`, sem descritor de classe; mas qualquer novo tipo de campo
+(`Date`, enum, `String[]`, outra coleção) tem de ser acrescentado ao filtro,
+senão o pedido passa a ser rejeitado na recepção.
+
+Listas devem ser declaradas como `ArrayList` e copiadas para um `ArrayList` no
+construtor, como faz a `Rotina`. Só `java.util.ArrayList` está liberado:
+`List.of(...)` e `Arrays.asList(...)` são outras classes e seriam rejeitadas.
+`java.lang.Object` também precisa estar no filtro porque o `readObject` do
+`ArrayList` valida um `Object[]` interno; isso não abre brecha, já que cada
+elemento da lista continua passando pelo filtro.
 
 ## Registro no MongoDB
 
-Cada documento da coleção `chamadas` registra uma conexão ou desativação do servidor.
+Cada documento da coleção `chamadas` registra um evento do servidor: conexão
+aberta ou encerrada, pedido recebido, início ou desativação. Os registros são
+gravados em segundo plano, por uma única thread e na ordem dos eventos, para
+que a gravação do log nunca atrase a resposta ao backend. O campo `dataHora` é
+o momento do evento, não o da gravação.
 
 Se o MongoDB estiver fora do ar, o servidor continua atendendo: a falha de
-gravação aparece no console e a resposta de status traz `bancoDisponivel=false`.
+gravação aparece no console, a resposta de status traz `bancoDisponivel=false`
+e os pedidos que dependem do banco recebem `RespostaDeErro` com
+`BANCO_INDISPONIVEL`. Cada operação espera o banco por no máximo 3 segundos
+(`RepositorioDeChamadas.TIMEOUT_DO_BANCO_EM_SEGUNDOS`). Esse valor precisa
+ficar abaixo do timeout do backend (`SERVIDOR_TIMEOUT_MS`, 5 segundos por
+padrão); senão, o backend desiste antes da resposta e o `/api/health` mostra
+`DOWN` em vez de `DEGRADED`.
 
 ## Testando
 

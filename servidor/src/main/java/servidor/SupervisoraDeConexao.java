@@ -12,18 +12,25 @@ public class SupervisoraDeConexao extends Thread
     // objetos maliciosos). o padrao casa o nome TOTALMENTE QUALIFICADO, por
     // isso o pacote precisa aparecer aqui; "!*" rejeita todo o resto.
     // String nao precisa ser liberada (vai no stream como TC_STRING, sem
-    // descritor de classe), mas qualquer novo tipo de campo (Date, List,
-    // classe de modelo) tem de ser acrescentado a este filtro.
+    // descritor de classe), mas qualquer novo tipo de campo (Date, enum,
+    // String[], outra colecao) tem de ser acrescentado a este filtro.
+    //
+    // java.util.ArrayList entra por causa das listas da Rotina. ele sozinho
+    // nao basta: o readObject do ArrayList valida um Object[] interno, que o
+    // filtro checa como java.lang.Object. liberar Object nao abre brecha,
+    // porque cada elemento da lista continua passando pelo filtro.
     private static final String FILTRO =
-        "br.edu.time21.comunicacao.*;!*";
+        "br.edu.time21.comunicacao.*;java.util.ArrayList;java.lang.Object;!*";
 
     private Parceiro               usuario;
     private Socket                 conexao;
     private ArrayList<Parceiro>    usuarios;
     private RepositorioDeChamadas  repositorio;
+    private OperacoesDeRotina      operacoesDeRotina;
 
     public SupervisoraDeConexao
-    (Socket conexao, ArrayList<Parceiro> usuarios, RepositorioDeChamadas repositorio)
+    (Socket conexao, ArrayList<Parceiro> usuarios, RepositorioDeChamadas repositorio,
+     OperacoesDeRotina operacoesDeRotina)
     throws Exception
     {
         if (conexao==null)
@@ -35,9 +42,13 @@ public class SupervisoraDeConexao extends Thread
         if (repositorio==null)
             throw new Exception ("Repositorio ausente");
 
-        this.conexao     = conexao;
-        this.usuarios    = usuarios;
-        this.repositorio = repositorio;
+        if (operacoesDeRotina==null)
+            throw new Exception ("Operacoes de rotina ausentes");
+
+        this.conexao           = conexao;
+        this.usuarios          = usuarios;
+        this.repositorio       = repositorio;
+        this.operacoesDeRotina = operacoesDeRotina;
     }
 
     public void run ()
