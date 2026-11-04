@@ -375,10 +375,20 @@ elemento da lista continua passando pelo filtro.
 
 ## Registro no MongoDB
 
-Cada documento da coleção `chamadas` registra uma conexão ou desativação do servidor.
+Cada documento da coleção `chamadas` registra um evento do servidor: conexão
+aberta ou encerrada, pedido recebido, início ou desativação. Os registros são
+gravados em segundo plano, por uma única thread e na ordem dos eventos, para
+que a gravação do log nunca atrase a resposta ao backend. O campo `dataHora` é
+o momento do evento, não o da gravação.
 
 Se o MongoDB estiver fora do ar, o servidor continua atendendo: a falha de
-gravação aparece no console e a resposta de status traz `bancoDisponivel=false`.
+gravação aparece no console, a resposta de status traz `bancoDisponivel=false`
+e os pedidos que dependem do banco recebem `RespostaDeErro` com
+`BANCO_INDISPONIVEL`. Cada operação espera o banco por no máximo 3 segundos
+(`RepositorioDeChamadas.TIMEOUT_DO_BANCO_EM_SEGUNDOS`). Esse valor precisa
+ficar abaixo do timeout do backend (`SERVIDOR_TIMEOUT_MS`, 5 segundos por
+padrão); senão, o backend desiste antes da resposta e o `/api/health` mostra
+`DOWN` em vez de `DEGRADED`.
 
 ## Testando
 

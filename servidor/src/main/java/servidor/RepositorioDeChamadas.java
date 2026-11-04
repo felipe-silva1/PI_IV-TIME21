@@ -9,6 +9,9 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
 import java.util.Date;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 // Classe que interage com o MongoDB
@@ -17,9 +20,24 @@ public class RepositorioDeChamadas
     public static String BANCO_PADRAO    = "servidor";
     public static String COLECAO_PADRAO  = "chamadas";
 
+    // quanto uma operacao espera o MongoDB antes de desistir. com o banco
+    // fora do ar, toda operacao espera esse tempo inteiro, entao ele tem de
+    // ficar abaixo do timeout do backend (SERVIDOR_TIMEOUT_MS, 5 s por
+    // padrao): so assim o backend recebe a RespostaDeErro/RespostaDeStatus
+    // antes de desistir da conexao
+    public static final int TIMEOUT_DO_BANCO_EM_SEGUNDOS = 3;
+
+    // limite de registros esperando para ser gravados (banco fora do ar por
+    // muito tempo); passando disso, os novos sao descartados
+    private static final int TAMANHO_DA_FILA = 1000;
+
     private MongoClient               cliente;
     private MongoDatabase             banco;
     private MongoCollection<Document> colecao;
+
+    // grava os registros em segundo plano, um por vez e na ordem em que
+    // chegaram, para que uma gravacao lenta nao atrase a resposta ao backend
+    private ThreadPoolExecutor        gravador;
 
     public RepositorioDeChamadas (String uri, String nomeDoBanco)
     throws Exception
@@ -36,7 +54,8 @@ public class RepositorioDeChamadas
             MongoClientSettings.builder()
                 .applyConnectionString (new ConnectionString (uri))
                 .applyToClusterSettings (b ->
-                    b.serverSelectionTimeout (10, TimeUnit.SECONDS))
+                    b.serverSelectionTimeout (RepositorioDeChamadas.TIMEOUT_DO_BANCO_EM_SEGUNDOS,
+                                              TimeUnit.SECONDS))
                 .build();
 
             // conexao nao falha se banco estiver fora do ar, usar estaDisponivel() para pegar status do banco
@@ -48,20 +67,49 @@ public class RepositorioDeChamadas
         {
             throw new Exception ("URI do MongoDB invalida");
         }
+
+        // uma unica thread, daemon para nunca impedir o fim do programa
+        this.gravador =
+        new ThreadPoolExecutor (1, 1, 0L, TimeUnit.MILLISECONDS,
+                                new ArrayBlockingQueue<Runnable> (RepositorioDeChamadas.TAMANHO_DA_FILA),
+                                tarefa ->
+                                {
+                                    Thread thread = new Thread (tarefa, "gravador-de-chamadas");
+                                    thread.setDaemon (true);
+                                    return thread;
+                                });
     }
 
+    // so enfileira o registro e volta na hora; quem grava e o gravador
     public void registrar (String tipo, String origem, String detalhes)
+    {
+        // dataHora e o momento do evento, nao o da gravacao
+        Document registro =
+            new Document ("tipo",     tipo)
+                .append  ("origem",   origem)
+                .append  ("detalhes", detalhes)
+                .append  ("dataHora", new Date());
+
+        try
+        {
+            this.gravador.execute (() -> this.gravar (registro));
+        }
+        catch (RejectedExecutionException erro)
+        {
+            // fila cheia, ou repositorio ja fechado
+            System.err.println ("Registro descartado: tipo=" + tipo + ", origem=" + origem);
+        }
+    }
+
+    private void gravar (Document registro)
     {
         try
         {
-            this.colecao.insertOne (
-                new Document ("tipo",     tipo)
-                    .append  ("origem",   origem)
-                    .append  ("detalhes", detalhes)
-                    .append  ("dataHora", new Date()));
-                    
-            // DEBUG: Print no console para todo dado enviado ao mongoDB com sucesso    
-            System.out.println ("Dado enviado com sucesso para o MongoDB: tipo=" + tipo + ", origem=" + origem);
+            this.colecao.insertOne (registro);
+
+            // DEBUG: Print no console para todo dado enviado ao mongoDB com sucesso
+            System.out.println ("Dado enviado com sucesso para o MongoDB: tipo=" + registro.getString ("tipo") +
+                                ", origem=" + registro.getString ("origem"));
         }
         catch (Exception erro)
         {
@@ -89,8 +137,22 @@ public class RepositorioDeChamadas
         }
     }
 
+    // da um tempo para os registros pendentes (como SERVIDOR_DESATIVADO)
+    // serem gravados; o que nao der tempo e descartado antes de fechar
     public void fechar ()
     {
+        this.gravador.shutdown();
+        try
+        {
+            if (!this.gravador.awaitTermination (RepositorioDeChamadas.TIMEOUT_DO_BANCO_EM_SEGUNDOS + 2,
+                                                 TimeUnit.SECONDS))
+                this.gravador.shutdownNow();
+        }
+        catch (InterruptedException erro)
+        {
+            this.gravador.shutdownNow();
+        }
+
         try
         {
             this.cliente.close();
