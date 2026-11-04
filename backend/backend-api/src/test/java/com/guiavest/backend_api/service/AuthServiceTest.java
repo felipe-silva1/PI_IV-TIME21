@@ -1,20 +1,41 @@
 package com.guiavest.backend_api.service;
 
+import br.edu.time21.comunicacao.PedidoDeCadastro;
 import br.edu.time21.comunicacao.PedidoDeLogin;
 import br.edu.time21.comunicacao.RespostaDeConta;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.mockito.ArgumentCaptor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class AuthServiceTest
 {
+    @Test
+    void cadastroEnviaSomenteHashDaSenhaAoServidor()
+    {
+        ClienteSocket clienteSocket = mock(ClienteSocket.class);
+        when(clienteSocket.enviar(any(PedidoDeCadastro.class))).thenReturn(
+                new RespostaDeConta(RespostaDeConta.OK, "id-1", "Estudante", null));
+        AuthService servico = new AuthService(clienteSocket);
+
+        servico.cadastrar("Estudante", "estudante@example.com", "senha-segura-123");
+
+        ArgumentCaptor<PedidoDeCadastro> pedido = ArgumentCaptor.forClass(PedidoDeCadastro.class);
+        verify(clienteSocket).enviar(pedido.capture());
+        String senhaHash = pedido.getValue().getSenhaHash();
+        assertNotEquals("senha-segura-123", senhaHash);
+        assertTrue(new BCryptPasswordEncoder().matches("senha-segura-123", senhaHash));
+    }
+
     @Test
     void loginValidoCriaSessaoVerificavel()
     {

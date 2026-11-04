@@ -21,6 +21,36 @@ async function requisicaoAutenticada(url, options = {}) {
 }
 
 async function mensagemDeErro(response) {
-  const body = await response.json();
-  return body.message || 'Não foi possível concluir a operação.';
+  try {
+    const body = await response.json();
+    return body.message || 'Não foi possível concluir a operação.';
+  } catch {
+    return 'Não foi possível concluir a operação.';
+  }
+}
+
+async function exigirSessao() {
+  if (!sessionStorage.getItem(AUTH_TOKEN_KEY)) {
+    location.replace('../login.html');
+    return;
+  }
+
+  try {
+    const response = await requisicaoAutenticada(`${AUTH_API_URL}/session`);
+    if (response.status === 401) {
+      limparSessao();
+      location.replace('../login.html');
+      return;
+    }
+    if (!response.ok) {
+      throw new Error(await mensagemDeErro(response));
+    }
+  } catch (falha) {
+    document.body.replaceChildren(
+      Object.assign(document.createElement('p'), {
+        role: 'alert',
+        textContent: falha.message || 'Não foi possível validar sua sessão.'
+      })
+    );
+  }
 }
