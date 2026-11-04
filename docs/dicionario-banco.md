@@ -1,4 +1,4 @@
-# Dicionario de dados do sistema MongoDB. Banco: GuiaVest
+# Dicionario de dados do sistema MongoDB. Banco: guiavest
 
 O intuito do dicionario é ser usado durante desenvolvimento, para implementação correta do backend. Quaisquer mudanças a modelagem do banco, por favor documentar aqui...
 
