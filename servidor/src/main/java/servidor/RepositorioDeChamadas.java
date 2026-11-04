@@ -69,6 +69,13 @@ public class RepositorioDeChamadas
         }
     }
 
+    // os outros bancos (como o da aplicacao, usado por OperacoesDeRotina)
+    // sao abertos pelo mesmo cliente, para compartilhar o pool de conexoes
+    public MongoDatabase getBanco (String nome)
+    {
+        return this.cliente.getDatabase (nome);
+    }
+
     public boolean estaDisponivel ()
     {
         try

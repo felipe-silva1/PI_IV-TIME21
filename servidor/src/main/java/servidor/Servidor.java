@@ -9,6 +9,11 @@ public class Servidor {
     public static String PORTA_PADRAO = "3000";
     public static String MONGO_URI_PADRAO = "mongodb://localhost:27017";
 
+    // banco com os dados da aplicacao (docs/dicionario-banco.md); o log de
+    // chamadas continua em RepositorioDeChamadas.BANCO_PADRAO. o MongoDB
+    // diferencia maiusculas: tem de ser igual ao nome no Atlas
+    public static String BANCO_GUIAVEST = "guiavest";
+
     private static String config (String[] args, int pos, String variavel, String padrao)
     {
         if (args.length>pos)
@@ -31,10 +36,12 @@ public class Servidor {
         String porta    = Servidor.config (args, 0, "SERVIDOR_PORTA", Servidor.PORTA_PADRAO);
         String mongoUri = Servidor.config (args, 1, "MONGO_URI",      Servidor.MONGO_URI_PADRAO);
 
-        RepositorioDeChamadas repositorio = null;
+        RepositorioDeChamadas repositorio       = null;
+        OperacoesDeRotina     operacoesDeRotina = null;
         try
         {
-            repositorio = new RepositorioDeChamadas(mongoUri, RepositorioDeChamadas.BANCO_PADRAO);
+            repositorio       = new RepositorioDeChamadas(mongoUri, RepositorioDeChamadas.BANCO_PADRAO);
+            operacoesDeRotina = new OperacoesDeRotina(repositorio.getBanco(Servidor.BANCO_GUIAVEST));
         }
         catch (Exception erro)
         {
@@ -47,7 +54,7 @@ public class Servidor {
         AceitadoraDeConexao aceitadoraDeConexao = null;
         try
         {
-            aceitadoraDeConexao = new AceitadoraDeConexao(porta, usuarios, repositorio);
+            aceitadoraDeConexao = new AceitadoraDeConexao(porta, usuarios, repositorio, operacoesDeRotina);
             aceitadoraDeConexao.start();
         }
         catch (Exception erro)
@@ -59,6 +66,7 @@ public class Servidor {
 
         System.out.println("O servidor esta ativo na porta " + porta);
         repositorio.registrar("SERVIDOR_INICIADO", "local", "porta=" + porta);
+        operacoesDeRotina.garantirIndices();
 
         for(;;)
         {
