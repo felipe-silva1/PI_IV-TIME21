@@ -13,6 +13,7 @@ import org.bson.types.ObjectId;
 import com.mongodb.MongoWriteException;
 
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 // Classe que interage com o MongoDB
@@ -25,6 +26,7 @@ public class RepositorioDeChamadas
     private MongoDatabase             banco;
     private MongoCollection<Document> colecao;
     private MongoCollection<Document> usuarios;
+    private boolean indiceEmailCriado;
 
     public RepositorioDeChamadas (String uri, String nomeDoBanco)
     throws Exception
@@ -58,10 +60,10 @@ public class RepositorioDeChamadas
 
     public String cadastrarUsuario(String nome, String email, String senhaHash)
     {
-        this.usuarios.createIndex(Indexes.ascending("email"),
-                                  new IndexOptions().unique(true));
+        this.criarIndiceUnicoDeEmail();
+        String emailNormalizado = normalizarEmail(email);
         Document usuario = new Document("nome", nome)
-                .append("email", email)
+                .append("email", emailNormalizado)
                 .append("senhaHash", senhaHash)
                 .append("criadoEm", new Date());
 
@@ -80,7 +82,25 @@ public class RepositorioDeChamadas
 
     public Document buscarUsuario(String email)
     {
-        return this.usuarios.find(new Document("email", email)).first();
+        return this.usuarios.find(new Document("email", normalizarEmail(email))).first();
+    }
+
+    private synchronized void criarIndiceUnicoDeEmail()
+    {
+        if (this.indiceEmailCriado)
+            return;
+
+        this.usuarios.createIndex(Indexes.ascending("email"),
+                                  new IndexOptions().unique(true));
+        this.indiceEmailCriado = true;
+    }
+
+    private static String normalizarEmail(String email)
+    {
+        if (email == null)
+            throw new IllegalArgumentException("E-mail ausente");
+
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 
     public void registrar (String tipo, String origem, String detalhes)
