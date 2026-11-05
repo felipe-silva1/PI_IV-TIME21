@@ -14,7 +14,7 @@ document.querySelector('.mostrar-senha').addEventListener('click', e => {
   btn.setAttribute('aria-label', mostrar ? 'Ocultar senha' : 'Mostrar senha');
 });
 
-formLogin.addEventListener('submit', e => {
+formLogin.addEventListener('submit', async e => {
   e.preventDefault();
   const [email, senha] = formLogin.querySelectorAll('input');
   const erro = document.getElementById('l-erro');
@@ -29,6 +29,21 @@ formLogin.addEventListener('submit', e => {
   erro.textContent = msg;
   if (ruim) return ruim.focus();
 
-  ok.textContent = 'Login válido! Redirecionando…';
-  location.href = 'pages/dashboard.html';
+  const submit = formLogin.querySelector('button[type="submit"]');
+  submit.disabled = true;
+  try {
+    const response = await fetch(`${AUTH_API_URL}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value.trim(), senha: senha.value })
+    });
+    if (!response.ok) throw new Error(await mensagemDeErro(response));
+    guardarSessao(await response.json());
+    ok.textContent = 'Login realizado! Redirecionando…';
+    location.href = 'dashboard.html';
+  } catch (falha) {
+    erro.textContent = falha.message || 'Não foi possível conectar à API.';
+  } finally {
+    submit.disabled = false;
+  }
 });

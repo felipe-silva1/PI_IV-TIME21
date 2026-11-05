@@ -6,12 +6,14 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import org.bson.Document;
+import org.bson.types.ObjectId;
+import com.mongodb.MongoWriteException;
 
 import java.util.Date;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 // Classe que interage com o MongoDB
@@ -34,6 +36,8 @@ public class RepositorioDeChamadas
     private MongoClient               cliente;
     private MongoDatabase             banco;
     private MongoCollection<Document> colecao;
+    private MongoCollection<Document> usuarios;
+    private boolean indiceEmailCriado;
 
     // grava os registros em segundo plano, um por vez e na ordem em que
     // chegaram, para que uma gravacao lenta nao atrase a resposta ao backend
@@ -62,6 +66,7 @@ public class RepositorioDeChamadas
             this.cliente = MongoClients.create (configuracao);
             this.banco   = this.cliente.getDatabase (nomeDoBanco);
             this.colecao = this.banco.getCollection (RepositorioDeChamadas.COLECAO_PADRAO);
+            this.usuarios = this.banco.getCollection ("usuarios");
         }
         catch (Exception erro)
         {
@@ -80,7 +85,51 @@ public class RepositorioDeChamadas
                                 });
     }
 
-    // so enfileira o registro e volta na hora; quem grava e o gravador
+    public String cadastrarUsuario(String nome, String email, String senhaHash)
+    {
+        this.criarIndiceUnicoDeEmail();
+        String emailNormalizado = normalizarEmail(email);
+        Document usuario = new Document("nome", nome)
+                .append("email", emailNormalizado)
+                .append("senhaHash", senhaHash)
+                .append("criadoEm", new Date());
+
+        try
+        {
+            this.usuarios.insertOne(usuario);
+            return ((ObjectId) usuario.get("_id")).toHexString();
+        }
+        catch (MongoWriteException erro)
+        {
+            if (erro.getError().getCode() == 11000)
+                return null;
+            throw erro;
+        }
+    }
+
+    public Document buscarUsuario(String email)
+    {
+        return this.usuarios.find(new Document("email", normalizarEmail(email))).first();
+    }
+
+    private synchronized void criarIndiceUnicoDeEmail()
+    {
+        if (this.indiceEmailCriado)
+            return;
+
+        this.usuarios.createIndex(Indexes.ascending("email"),
+                                  new IndexOptions().unique(true));
+        this.indiceEmailCriado = true;
+    }
+
+    private static String normalizarEmail(String email)
+    {
+        if (email == null)
+            throw new IllegalArgumentException("E-mail ausente");
+
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+
     public void registrar (String tipo, String origem, String detalhes)
     {
         // dataHora e o momento do evento, nao o da gravacao
