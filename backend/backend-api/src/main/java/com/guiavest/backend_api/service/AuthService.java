@@ -46,6 +46,9 @@ public class AuthService
 
     public AuthSessionResponse entrar(String email, String senha)
     {
+        if (!senhaValidaParaHash(senha))
+            throw new AuthException(400, "Informe um e-mail e uma senha válidos.");
+
         Resposta resposta = this.clienteSocket.enviar(new PedidoDeLogin(email));
         if (resposta instanceof RespostaDeErro erro
                 && RespostaDeErro.PEDIDO_INVALIDO.equals(erro.getCodigo()))

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -44,7 +45,7 @@ public class AuthController
                     "message", "Confira nome, e-mail e senha (mínimo de 8 caracteres)."));
 
         RespostaDeConta conta = this.authService.cadastrar(
-                request.nome().trim(), request.email().trim().toLowerCase(),
+                request.nome().trim(), request.email().trim().toLowerCase(Locale.ROOT),
                 request.senha());
         if (RespostaDeConta.EMAIL_EM_USO.equals(conta.getCodigo()))
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -61,10 +62,12 @@ public class AuthController
     public AuthSessionResponse entrar(@RequestBody AuthRequest request)
     {
         if (request == null || request.email() == null || !emailValido(request.email())
-                || request.senha() == null || request.senha().isBlank())
+                || request.senha() == null || request.senha().isBlank()
+                || !AuthService.senhaValidaParaHash(request.senha()))
             throw new AuthException(400, "Informe um e-mail e uma senha válidos.");
 
-        return this.authService.entrar(request.email().trim().toLowerCase(),
+        return this.authService.entrar(
+                request.email().trim().toLowerCase(Locale.ROOT),
                                        request.senha());
     }
 
