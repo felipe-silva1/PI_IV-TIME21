@@ -17,12 +17,13 @@
         <h1>Escolha qual exame você quer focar</h1>
         <p class="legenda">Seu cronograma será montado a partir do exame escolhido.</p>
         <div class="grade">
-            <button type="button" data-pagina="cronograma.html?exame=enem" class="button-exam enem">Enem</button>
-            <button type="button" data-pagina="cronograma.html?exame=fuvest" class="button-exam fuvest">Fuvest</button>
-            <button type="button" data-pagina="cronograma.html?exame=unicamp" class="button-exam unicamp">Unicamp</button>
-            <button type="button" data-pagina="cronograma.html?exame=unesp" class="button-exam unesp">UNESP</button>
-            <button type="button" data-pagina="cronograma.html?exame=outros" class="button-exam outros">Outros exames</button>
+            <button type="button" data-exame="enem" class="button-exam enem" aria-pressed="false">Enem</button>
+            <button type="button" data-exame="fuvest" class="button-exam fuvest" aria-pressed="false">Fuvest</button>
+            <button type="button" data-exame="unicamp" class="button-exam unicamp" aria-pressed="false">Unicamp</button>
+            <button type="button" data-exame="unesp" class="button-exam unesp" aria-pressed="false">UNESP</button>
+            <button type="button" data-exame="outros" class="button-exam outros" aria-pressed="false">Outros exames</button>
         </div>
+         <p id="mensagem-selecao" aria-live="polite"></p>
     </main>
 
     <script src="../src/js/navegacao.js"></script>

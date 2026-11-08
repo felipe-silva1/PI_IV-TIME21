@@ -1,17 +1,175 @@
 /* Cards menores que a grade padrão: 5 por linha no computador, 2 no celular */
-.grade { grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); }
+/* =================================
+   GRADE DOS EXAMES
+================================= */
+
+.grade {
+    display: grid;
+
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: var(--espaco-5);
+}
+/* =================================
+   BOTÕES DOS EXAMES
+================================= */
 
 .button-exam {
-  display: flex; align-items: flex-end;
-  min-height: 140px;
-  padding: var(--espaco-5);
-  background: var(--card); color: var(--texto);
-  border: 1.5px solid var(--premium); border-radius: var(--raio-grande);
-  font-family: var(--fonte-titulo); font-size: 1.25rem; font-weight: 600; text-align: left;
-}
-.button-exam:hover { background: var(--subfundo); }
-.button-exam:focus-visible { outline: 2px solid var(--azul-primario); outline-offset: 2px; }
+    position: relative;
 
-@media (max-width: 760px) {
-  .button-exam { min-height: 96px; padding: var(--espaco-4); }
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 400px;
+
+    padding: var(--espaco-5);
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    color: white;
+
+    border: 2px solid transparent;
+    border-radius: var(--raio-grande);
+
+    font-family: var(--fonte-titulo);
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+
+    cursor: pointer;
+    overflow: hidden;
+
+    transition:
+        transform 0.2s,
+        filter 0.2s,
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
+
+/* =================================
+   IMAGENS INDIVIDUAIS
+================================= */
+
+.button-exam.enem {
+    background-image:
+        linear-gradient(
+            rgba(0,0,0,0.25)
+            rgba(0,0,0,0.25)
+        ),
+        url("../../assets/imagens/enem.jpg");
+
+}
+.button-exam.fuvest {
+    background-image:
+        linear-gradient(
+            rgba(0, 0, 0, 0.25),
+            rgba(0, 0, 0, 0.25)
+        ),
+        url("../../assets/imagens/fuvest.jpg");
+}
+.button-exam.unicamp {
+    background-image:
+        linear-gradient(
+            rgba(0, 0, 0, 0.25),
+            rgba(0, 0, 0, 0.25)
+        ),
+        url("../../assets/imagens/unicamp.jpg");
+}
+.button-exam.unesp {
+    background-image:
+        linear-gradient(
+            rgba(0, 0, 0, 0.25),
+            rgba(0, 0, 0, 0.25)
+        ),
+        url("../../assets/imagens/unesp.jpg");
+}
+/* =================================
+   OUTROS EXAMES
+================================= */
+
+.button-exam.outros {
+    width: 100%;
+
+    min-height: 200px;
+
+    background: var(--azul-primario);
+
+    align-items: center;
+
+    font-size: 1.25rem;
+}
+/* =================================
+   TEXTO DOS CARDS
+================================= */
+
+.button-exam span {
+    margin-top: 20px;
+}
+/* =================================
+   CARD SELECIONADO
+================================= */
+
+.button-exam.selecionado {
+    border: 4px solid var(--azul-primario);
+
+    box-shadow: 0 0 0 3px rgba(39, 133, 216, 0.25);
+
+    filter: brightness(1.1);
+
+    transform: scale(1.02);
+}
+/* =================================
+   INTERAÇÕES
+================================= */
+
+.button-exam:hover {
+    filter: brightness(0.85);
+
+    transform: scale(1.02);
+}
+
+.button-exam:active {
+    transform: scale(0.98);
+}
+
+.button-exam:focus-visible {
+    outline: 3px solid var(--azul-primario);
+    outline-offset: 3px;
+}
+/* =================================
+   MENSAGEM DE SELEÇÃO
+================================= */
+
+#mensagem-selecao {
+    margin-top: var(--espaco-5);
+}
+
+
+/* =================================
+   RESPONSIVIDADE
+================================= */
+
+@media (max-width: 1000px) {
+
+    .grade {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .grade {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .button-exam {
+        min-height: 180px;
+        font-size: 1.2rem;
+    }
+
 }
