@@ -116,7 +116,7 @@
 .button-exam.selecionado {
     border: 4px solid var(--azul-primario);
 
-    box-shadow: 0 0 0 3px rgba(39, 133, 216, 0.25);
+    box-shadow: 0 0 0 3px rgba(3, 38, 68, 0.25);
 
     filter: brightness(1.1);
 
@@ -171,5 +171,4 @@
         min-height: 180px;
         font-size: 1.2rem;
     }
-
 }
