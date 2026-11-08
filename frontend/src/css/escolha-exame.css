@@ -18,7 +18,7 @@
     position: relative;
 
     display: flex;
-    align-items: flex-start;
+    align-items: flex-center;
     justify-content: center;
 
     width: 100%;
@@ -30,24 +30,26 @@
     background-position: center;
     background-repeat: no-repeat;
 
-    color: white;
-
-    border: 2px solid transparent;
+    /* Bordas */
+    border: 3px solid var(--cor-exame);
     border-radius: var(--raio-grande);
 
+     /* Texto */
+    color: white;
     font-family: var(--fonte-titulo);
     font-size: 1.5rem;
     font-weight: 600;
     text-align: center;
 
+     /* Interação */
     cursor: pointer;
     overflow: hidden;
 
     transition:
-        transform 0.2s,
-        filter 0.2s,
-        border-color 0.2s,
-        box-shadow 0.2s;
+        transform 0.25s ease,
+        filter 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
 }
 
 /* =================================
@@ -55,35 +57,43 @@
 ================================= */
 
 .button-exam.enem {
+    --cor-exame: #65c94b;
+
     background-image:
         linear-gradient(
-            rgba(0,0,0,0.25)
-            rgba(0,0,0,0.25)
+            rgba(0,0,0,0.12),
+            rgba(0,0,0,0.12)
         ),
         url("../../assets/imagens/enem.jpg");
 
 }
 .button-exam.fuvest {
+     --cor-exame: #5969e8;
+
     background-image:
         linear-gradient(
-            rgba(0, 0, 0, 0.25),
-            rgba(0, 0, 0, 0.25)
+            rgba(0, 0, 0, 0.12),
+            rgba(0, 0, 0, 0.12)
         ),
         url("../../assets/imagens/fuvest.jpg");
 }
 .button-exam.unicamp {
+     --cor-exame: #e34c58;
+
     background-image:
         linear-gradient(
-            rgba(0, 0, 0, 0.25),
-            rgba(0, 0, 0, 0.25)
+            rgba(0, 0, 0, 0.12),
+            rgba(0, 0, 0, 0.12)
         ),
         url("../../assets/imagens/unicamp.jpg");
 }
 .button-exam.unesp {
+      --cor-exame: #e7b83f;
+
     background-image:
         linear-gradient(
-            rgba(0, 0, 0, 0.25),
-            rgba(0, 0, 0, 0.25)
+            rgba(0, 0, 0, 0.12),
+            rgba(0, 0, 0, 0.12)
         ),
         url("../../assets/imagens/unesp.jpg");
 }
@@ -92,44 +102,55 @@
 ================================= */
 
 .button-exam.outros {
+     --cor-exame: #638cf0;
+
     width: 100%;
 
-    min-height: 200px;
+    min-height: 100px;
 
-    background: var(--azul-primario);
+    background: var(--cor-exame);
 
     align-items: center;
 
-    font-size: 1.25rem;
+    font-size: 1.2rem;
 }
 /* =================================
    TEXTO DOS CARDS
 ================================= */
 
 .button-exam span {
-    margin-top: 20px;
+    position: relative;
+    z-index: 1;
+
+    margin-top: 5px;
+
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
 }
 /* =================================
    CARD SELECIONADO
 ================================= */
 
 .button-exam.selecionado {
-    border: 4px solid var(--azul-primario);
+    border: 4px solid var(--cor-exame);
 
-    box-shadow: 0 0 0 3px rgba(3, 38, 68, 0.25);
+    box-shadow: 
+        0 0 0 3px rgba(255, 255, 255, 0.9),
+        0 0 18px var(-cor--exame);
 
-    filter: brightness(1.1);
+    filter: brightness(1.03);
 
-    transform: scale(1.02);
+    transform: scale(1.08);
 }
 /* =================================
    INTERAÇÕES
 ================================= */
 
 .button-exam:hover {
-    filter: brightness(0.85);
+    filter: brightness(1.08);
 
-    transform: scale(1.02);
+    transform: translateY(-5px);
+
+    box-shadow: 0 5px 18px var(--cor-exame);
 }
 
 .button-exam:active {
@@ -137,8 +158,8 @@
 }
 
 .button-exam:focus-visible {
-    outline: 3px solid var(--azul-primario);
-    outline-offset: 3px;
+    outline: 3px solid white;
+    outline-offset: 4px;
 }
 /* =================================
    MENSAGEM DE SELEÇÃO
@@ -153,7 +174,7 @@
    RESPONSIVIDADE
 ================================= */
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
 
     .grade {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -161,14 +182,23 @@
 
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 
     .grade {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .button-exam {
-        min-height: 180px;
+        min-height: 220px;
         font-size: 1.2rem;
     }
+}
+
+@media (max-width: 380px) {
+
+    .button-exam {
+        min-height: 180px;
+        font-size: 1rem;
+    }
+
 }
