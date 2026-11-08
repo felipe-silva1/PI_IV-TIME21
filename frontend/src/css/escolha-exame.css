@@ -6,7 +6,7 @@
 .grade {
     display: grid;
 
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
 
     gap: var(--espaco-5);
 }
@@ -22,7 +22,7 @@
     justify-content: center;
 
     width: 100%;
-    min-height: 400px;
+    min-height: 500px;
 
     padding: var(--espaco-5);
 
@@ -37,7 +37,7 @@
      /* Texto */
     color: white;
     font-family: var(--fonte-titulo);
-    font-size: 1.5rem;
+    font-size: 1.65rem;
     font-weight: 600;
     text-align: center;
 
@@ -61,7 +61,7 @@
 
     background-image:
         linear-gradient(
-            rgba(0,0,0,0.12),
+            rgba(100, 201, 75, 0.63),
             rgba(0,0,0,0.12)
         ),
         url("../../assets/imagens/enem.jpg");
@@ -72,7 +72,7 @@
 
     background-image:
         linear-gradient(
-            rgba(0, 0, 0, 0.12),
+            rgba(89, 106, 232, 0.637),
             rgba(0, 0, 0, 0.12)
         ),
         url("../../assets/imagens/fuvest.jpg");
@@ -82,7 +82,7 @@
 
     background-image:
         linear-gradient(
-            rgba(0, 0, 0, 0.12),
+            rgba(227, 76, 88, 0.63),
             rgba(0, 0, 0, 0.12)
         ),
         url("../../assets/imagens/unicamp.jpg");
@@ -92,7 +92,7 @@
 
     background-image:
         linear-gradient(
-            rgba(0, 0, 0, 0.12),
+            rgba(231, 184, 63, 0.63),
             rgba(0, 0, 0, 0.12)
         ),
         url("../../assets/imagens/unesp.jpg");
@@ -102,17 +102,12 @@
 ================================= */
 
 .button-exam.outros {
-     --cor-exame: #638cf0;
+    --cor-exame: #5969e8;
 
-    width: 100%;
-
-    min-height: 100px;
-
-    background: var(--cor-exame);
-
+    align-self: start;
     align-items: center;
 
-    font-size: 1.2rem;
+    background: var(--cor-exame);
 }
 /* =================================
    TEXTO DOS CARDS
@@ -135,7 +130,7 @@
 
     box-shadow: 
         0 0 0 3px rgba(255, 255, 255, 0.9),
-        0 0 18px var(-cor--exame);
+        0 0 18px var(--cor-exame);
 
     filter: brightness(1.03);
 
@@ -169,36 +164,105 @@
     margin-top: var(--espaco-5);
 }
 
+/* =================================
+   PÁGINA OCUPA A ALTURA TODA
+   (empurra o rodapé para a base)
+================================= */
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.conteudo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =================================
+   RODAPÉ DE AÇÃO E CONTINUAR
+================================= */
+
+.acoes-exame {
+    margin-top: auto;           
+    padding-top: var(--espaco-6);
+    padding-bottom: calc(var(--espaco-4) + env(safe-area-inset-bottom, 0px));
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espaco-4);
+    flex-wrap: wrap;
+}
+
+#mensagem-selecao {
+    color: var(--texto-suave);
+    font-weight: 500;
+}
+
+.btn-continuar {
+    padding: var(--espaco-4) var(--espaco-7); font-size: 1.1rem;
+    background: var(--azul-primario);
+    color: var(--texto);
+    border: 0;
+    border-radius: var(--raio);
+    font-weight: 600;
+    transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-continuar:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.btn-continuar:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.btn-continuar:focus-visible {
+    outline: 2px solid var(--texto);
+    outline-offset: 2px;
+}
 
 /* =================================
    RESPONSIVIDADE
 ================================= */
 
-@media (max-width: 1100px) {
-
-    .grade {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-}
-
 @media (max-width: 700px) {
-
     .grade {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .button-exam {
-        min-height: 220px;
+        min-height: 250px;
         font-size: 1.2rem;
+    }
+
+    .button-exam.outros {
+        min-height: 125px;
+    }
+
+    .acoes-exame {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .btn-continuar {
+        width: 100%;
     }
 }
 
 @media (max-width: 380px) {
-
     .button-exam {
-        min-height: 180px;
-        font-size: 1rem;
+        min-height: 200px;
+        font-size: 1.1rem;
     }
 
+    .button-exam.outros {
+        min-height: 100px;
+    }
 }

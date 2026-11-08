@@ -2,22 +2,18 @@
    ELEMENTOS DA PÁGINA
 ================================= */
 
-// Recupera todos os botões de exames
 const botoesExame = document.querySelectorAll('[data-exame]');
-
-// Elemento para exibir mensagens
-const mensagemSelecao =
-    document.getElementById('mensagem-selecao');
-
+const mensagemSelecao = document.getElementById('mensagem-selecao');
+const botaoContinuar = document.getElementById('btn-continuar');
 
 /* =================================
    CONFIGURAÇÃO DO ARMAZENAMENTO
 ================================= */
 
-// Nome da chave utilizada no sessionStorage
 const CHAVE_EXAME = 'exameSelecionado';
+// Altere para 'rotina.html' caso a Issue #15 crie um arquivo com esse nome
+const PAGINA_ROTINA = 'rotina.html'; // USADO DE EXEMPLO, IMPLEMENTAÇÃO DE ROTINA AINDA AUSENTE.
 
-// Opções válidas
 const examesValidos = [
     'enem',
     'fuvest',
@@ -25,90 +21,57 @@ const examesValidos = [
     'unesp',
     'outros'
 ];
+
 /* =================================
    RECUPERAR SELEÇÃO ANTERIOR
 ================================= */
 
-// Recupera o exame que já estava guardado
-let exameSelecionado =
-    sessionStorage.getItem(CHAVE_EXAME);
+let exameSelecionado = sessionStorage.getItem(CHAVE_EXAME);
 
-// Verifica se o valor armazenado é válido
 if (!examesValidos.includes(exameSelecionado)) {
     exameSelecionado = null;
     sessionStorage.removeItem(CHAVE_EXAME);
 }
+
 /* =================================
    ATUALIZAR DESTAQUE DOS CARDS
 ================================= */
 
 function atualizarSelecao() {
-
     botoesExame.forEach(botao => {
-
-        // Verifica se este botão representa o exame escolhido
-        const selecionado =
-            botao.dataset.exame === exameSelecionado;
-
-        // Adiciona ou remove a classe de destaque
-        botao.classList.toggle(
-            'selecionado',
-            selecionado
-        );
-
-        // Atualiza a informação de acessibilidade
-        botao.setAttribute(
-            'aria-pressed',
-            selecionado
-        );
-
+        const selecionado = botao.dataset.exame === exameSelecionado;
+        botao.classList.toggle('selecionado', selecionado);
+        botao.setAttribute('aria-pressed', selecionado);
     });
 
-    // Atualiza a mensagem apresentada ao usuário
     if (exameSelecionado) {
-
-        mensagemSelecao.textContent =
-            'Exame selecionado: ' +
-            exameSelecionado.toUpperCase();
-
+        mensagemSelecao.textContent = 'Exame selecionado: ' + exameSelecionado.toUpperCase();
+        botaoContinuar.disabled = false;
     } else {
-
-        mensagemSelecao.textContent =
-            'Selecione um exame para continuar.';
-
+        mensagemSelecao.textContent = 'Selecione um exame para continuar.';
+        botaoContinuar.disabled = true;
     }
-
 }
 
-
 /* =================================
-   EVENTO DE SELEÇÃO
+   EVENTOS
 ================================= */
 
 botoesExame.forEach(botao => {
-
     botao.addEventListener('click', () => {
-
-        // Identifica o exame correspondente ao botão
         exameSelecionado = botao.dataset.exame;
-
-        // Guarda a escolha no navegador
-        sessionStorage.setItem(
-            CHAVE_EXAME,
-            exameSelecionado
-        );
-
-        // Atualiza o destaque visual
+        sessionStorage.setItem(CHAVE_EXAME, exameSelecionado);
         atualizarSelecao();
-
     });
-
 });
 
+botaoContinuar.addEventListener('click', () => {
+    if (!exameSelecionado) return;
+    location.href = PAGINA_ROTINA;
+});
 
 /* =================================
    INICIALIZAÇÃO
 ================================= */
 
-// Recupera e apresenta a seleção ao abrir a página
 atualizarSelecao();
