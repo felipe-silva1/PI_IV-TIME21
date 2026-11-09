@@ -1,0 +1,422 @@
+.cabecalho-rotina {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--espaco-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--espaco-5);
+}
+
+.cabecalho-rotina h1 {
+    margin-bottom: var(--espaco-1);
+}
+
+.cabecalho-rotina .legenda {
+    margin-bottom: 0;
+}
+
+.resumo-exame {
+    display: flex;
+    align-items: center;
+    gap: var(--espaco-3);
+    padding: var(--espaco-2) var(--espaco-4);
+    background: var(--card);
+    border: 1px solid var(--subfundo);
+    border-radius: var(--raio);
+    font-size: 0.875rem;
+}
+
+.resumo-exame strong {
+    color: var(--azul-primario);
+}
+
+.link-trocar {
+    background: none;
+    border: 0;
+    color: var(--texto-suave);
+    font-size: 0.75rem;
+    text-decoration: underline;
+}
+
+.link-trocar:hover {
+    color: var(--texto);
+}
+
+.secao-rotina {
+    background: var(--card);
+    border: 1px solid var(--subfundo);
+    border-radius: var(--raio);
+    padding: var(--espaco-5);
+    margin-bottom: var(--espaco-5);
+}
+
+.secao-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espaco-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--espaco-1);
+}
+
+.contador {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--azul-primario);
+    background: rgba(91, 141, 245, 0.12);
+    padding: var(--espaco-1) var(--espaco-3);
+    border-radius: var(--raio);
+}
+
+/* Grade de dias e turnos */
+.grade-semana {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: var(--espaco-3);
+}
+
+.dia-card {
+    background: var(--fundo);
+    border: 1px solid var(--subfundo);
+    border-radius: var(--raio);
+    padding: var(--espaco-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaco-2);
+}
+
+.dia-card h3 {
+    font-size: 0.875rem;
+    text-align: center;
+    margin-bottom: var(--espaco-1);
+    color: var(--texto-suave);
+}
+
+.btn-turno {
+    padding: var(--espaco-2) var(--espaco-3);
+    background: var(--subfundo);
+    color: var(--texto-suave);
+    border: 1px solid transparent;
+    border-radius: var(--raio);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-align: center;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-turno:hover {
+    border-color: var(--azul-primario);
+    color: var(--texto);
+}
+
+.btn-turno.selecionado {
+    background: var(--azul-primario);
+    color: var(--texto);
+    border-color: var(--azul-primario);
+}
+
+/* Grade de matérias */
+.grade-materias {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+    gap: var(--espaco-3);
+}
+
+.btn-materia {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espaco-2);
+    padding: var(--espaco-3) var(--espaco-4);
+    background: var(--fundo);
+    color: var(--texto);
+    border: 1px solid var(--subfundo);
+    border-radius: var(--raio);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: left;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.btn-materia:hover {
+    border-color: var(--azul-primario);
+}
+
+.btn-materia.selecionada {
+    background: rgba(91, 141, 245, 0.16);
+    border-color: var(--azul-primario);
+}
+
+.ordem-prioridade {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 var(--espaco-1);
+    border-radius: 999px;
+    background: var(--subfundo);
+    color: var(--texto-suave);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.btn-materia.selecionada .ordem-prioridade {
+    background: var(--azul-primario);
+    color: var(--texto);
+}
+
+/* Rodapé e mensagens */
+.rodape-rotina {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espaco-4);
+    flex-wrap: wrap;
+}
+
+.mensagens-rotina {
+    flex: 1;
+    min-width: 240px;
+}
+
+.msg-erro:not(:empty) {
+    padding: var(--espaco-2) var(--espaco-3);
+    border-radius: var(--raio);
+    background: var(--vermelho-escuro);
+    color: var(--texto);
+    font-size: 0.8125rem;
+}
+
+.msg-sucesso:not(:empty) {
+    padding: var(--espaco-2) var(--espaco-3);
+    border-radius: var(--raio);
+    background: rgba(34, 160, 107, 0.18);
+    border: 1px solid var(--sucesso);
+    color: var(--texto);
+    font-size: 0.8125rem;
+}
+
+.btn-salvar {
+    padding: var(--espaco-3) var(--espaco-6);
+    background: var(--azul-primario);
+    color: var(--texto);
+    border: 0;
+    border-radius: var(--raio);
+    font-weight: 600;
+    transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-salvar:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.btn-salvar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-turno:focus-visible,
+.btn-materia:focus-visible,
+.btn-salvar:focus-visible {
+    outline: 2px solid var(--azul-primario);
+    outline-offset: 2px;
+}
+
+@media (max-width: 960px) {
+    .grade-semana {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .grade-semana {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rodape-rotina {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-salvar {
+        width: 100%;
+    }
+}
+
+/* ===== Fluxo em etapas ===== */
+.passos {
+    list-style: none;
+    display: flex;
+    gap: var(--espaco-5);
+    margin-bottom: var(--espaco-2);
+    font-size: 0.875rem;
+    color: var(--texto-suave);
+}
+
+.passo {
+    display: flex;
+    align-items: center;
+    gap: var(--espaco-2);
+    transition: color 0.2s ease;
+}
+
+.passo-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--subfundo);
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.passo.ativo {
+    color: var(--texto);
+    font-weight: 500;
+}
+
+.passo.ativo .passo-num,
+.passo.concluido .passo-num {
+    background: var(--azul-primario);
+    color: var(--texto);
+}
+
+.barra-progresso {
+    height: 4px;
+    background: var(--subfundo);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: var(--espaco-5);
+}
+
+.barra-progresso-fill {
+    height: 100%;
+    width: 50%;
+    background: var(--azul-primario);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.etapa[hidden] {
+    display: none;
+}
+
+.etapa h2:focus {
+    outline: none;
+}
+
+.etapa.entra-direita { animation: etapa-entra-direita 0.35s ease both; }
+.etapa.entra-esquerda { animation: etapa-entra-esquerda 0.35s ease both; }
+
+@keyframes etapa-entra-direita {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes etapa-entra-esquerda {
+    from { opacity: 0; transform: translateX(-24px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* Nome do dia como atalho para marcar tudo */
+.btn-dia {
+    width: 100%;
+    background: none;
+    border: 0;
+    padding: var(--espaco-1);
+    border-radius: var(--raio);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.btn-dia:hover {
+    color: var(--texto);
+}
+
+/* Hover/foco no nome do dia destaca o card inteiro */
+.dia-card {
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.dia-card:has(.btn-dia:hover),
+.dia-card:has(.btn-dia:focus-visible) {
+    border-color: var(--azul-primario);
+    background: rgba(91, 141, 245, 0.08);
+}
+
+.btn-turno {
+    padding-block: var(--espaco-3);
+}
+
+.btn-turno.selecionado {
+    animation: turno-pulso 0.2s ease;
+}
+
+@keyframes turno-pulso {
+    50% { transform: scale(1.04); }
+}
+
+.btn-materia.selecionada .ordem-prioridade {
+    animation: turno-pulso 0.2s ease;
+}
+
+/* Ações do rodapé */
+.acoes-rotina {
+    display: flex;
+    align-items: center;
+    gap: var(--espaco-3);
+}
+
+.acoes-rotina [hidden] {
+    display: none;
+}
+
+.btn-secundario {
+    padding: var(--espaco-3) var(--espaco-5);
+    background: transparent;
+    color: var(--texto-suave);
+    border: 1px solid var(--subfundo);
+    border-radius: var(--raio);
+    font-weight: 500;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-secundario:hover {
+    border-color: var(--azul-primario);
+    color: var(--texto);
+}
+
+.btn-secundario:focus-visible,
+.btn-dia:focus-visible {
+    outline: 2px solid var(--azul-primario);
+    outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+    .acoes-rotina {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .btn-secundario {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .etapa.entra-direita,
+    .etapa.entra-esquerda,
+    .btn-turno.selecionado,
+    .btn-materia.selecionada .ordem-prioridade {
+        animation: none;
+    }
+
+    .barra-progresso-fill {
+        transition: none;
+    }
+}
