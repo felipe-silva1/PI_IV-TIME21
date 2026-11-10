@@ -222,6 +222,11 @@ async function carregarRotinaSalva() {
 
         if (Array.isArray(rotina.materiasPrioritarias)) {
             materiasPrioritarias = [...rotina.materiasPrioritarias];
+
+            // Remove matérias salvas no banco que não pertencem ao vestibular atual
+            const permitidas = CATALOGO_MATERIAS[vestibularAtual] || [];
+            materiasPrioritarias = materiasPrioritarias.filter(m => permitidas.includes(m));
+
             renderizarMaterias();
         }
     } catch {
