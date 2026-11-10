@@ -66,7 +66,7 @@ public class RepositorioDeChamadas
             this.cliente = MongoClients.create (configuracao);
             this.banco   = this.cliente.getDatabase (nomeDoBanco);
             this.colecao = this.banco.getCollection (RepositorioDeChamadas.COLECAO_PADRAO);
-            this.usuarios = this.banco.getCollection ("usuarios");
+            this.usuarios = this.cliente.getDatabase(Servidor.BANCO_GUIAVEST).getCollection("usuarios");
         }
         catch (Exception erro)
         {
