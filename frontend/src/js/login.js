@@ -40,7 +40,7 @@ formLogin.addEventListener('submit', async e => {
     if (!response.ok) throw new Error(await mensagemDeErro(response));
     guardarSessao(await response.json());
     ok.textContent = 'Login realizado! Redirecionando…';
-    location.href = 'dashboard.html';
+    location.href = 'pages/dashboard.html';
   } catch (falha) {
     erro.textContent = falha.message || 'Não foi possível conectar à API.';
   } finally {
