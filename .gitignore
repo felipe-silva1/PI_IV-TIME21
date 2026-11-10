@@ -4,4 +4,4 @@ target/
 .idea/
 .DS_Store
 Thumbs.db
-repomix-output
+repomix-output.*
