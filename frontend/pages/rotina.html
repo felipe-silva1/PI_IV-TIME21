@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GuiaVest - Minha Rotina</title>
+    <link rel="stylesheet" href="../src/css/base.css">
+    <link rel="stylesheet" href="../src/css/layout.css">
+    <link rel="stylesheet" href="../src/css/rotina.css">
+</head>
+<body>
+    <header class="topo">
+        <div class="logo">GuiaVest</div>
+        <nav class="menu" aria-label="Navegação principal">
+            <button type="button" data-pagina="dashboard.html">Painel</button>
+            <button type="button" data-pagina="cronograma.html">Cronograma</button>
+            <button type="button" data-pagina="metas.html">Metas</button>
+            <button type="button" data-pagina="lembretes.html">Lembretes</button>
+        </nav>
+    </header>
+
+    <main class="conteudo">
+        <div class="cabecalho-rotina">
+            <div>
+                <h1>Configure sua rotina de estudos</h1>
+                <p class="legenda">Marque seus turnos livres na semana e as matérias que precisam de maior prioridade.</p>
+            </div>
+            <div class="resumo-exame">
+                <span>Foco: <strong id="exame-atual">ENEM</strong></span>
+                <button type="button" class="link-trocar" data-pagina="escolha-exame.html">Trocar exame</button>
+            </div>
+        </div>
+
+        <ol class="passos" aria-label="Etapas da rotina">
+            <li class="passo ativo" data-passo="1" aria-current="step"><span class="passo-num">1</span>Turnos livres</li>
+            <li class="passo" data-passo="2"><span class="passo-num">2</span>Matérias</li>
+        </ol>
+        <div class="barra-progresso" aria-hidden="true"><div class="barra-progresso-fill" id="barra-progresso"></div></div>
+
+        <form id="form-rotina" novalidate>
+            <!-- Etapa 1: Turnos Livres -->
+            <section class="secao-rotina etapa" id="etapa-1" data-etapa="1" aria-labelledby="titulo-turnos">
+                <div class="secao-topo">
+                    <h2 id="titulo-turnos" tabindex="-1">Quando você pode estudar?</h2>
+                    <span class="contador" id="contador-turnos">0 turnos selecionados</span>
+                </div>
+                <p class="legenda">Toque nos períodos livres de cada dia. Toque no nome do dia para marcar ou limpar todos de uma vez.</p>
+
+                <div class="grade-semana" role="group" aria-label="Turnos livres por dia da semana">
+                    <div class="dia-card" data-dia="1">
+                        <h3><button type="button" class="btn-dia" data-dia="1" aria-label="Marcar ou limpar todos os turnos de Segunda">Segunda</button></h3>
+                        <button type="button" class="btn-turno" data-dia="1" data-turno="MANHA" aria-pressed="false">Manhã</button>
+                        <button type="button" class="btn-turno" data-dia="1" data-turno="TARDE" aria-pressed="false">Tarde</button>
+                        <button type="button" class="btn-turno" data-dia="1" data-turno="NOITE" aria-pressed="false">Noite</button>
+                    </div>
+                    <div class="dia-card" data-dia="2">
+                        <h3><button type="button" class="btn-dia" data-dia="2" aria-label="Marcar ou limpar todos os turnos de Terça">Terça</button></h3>
+                        <button type="button" class="btn-turno" data-dia="2" data-turno="MANHA" aria-pressed="false">Manhã</button>
+                        <button type="button" class="btn-turno" data-dia="2" data-turno="TARDE" aria-pressed="false">Tarde</button>
+                        <button type="button" class="btn-turno" data-dia="2" data-turno="NOITE" aria-pressed="false">Noite</button>
+                    </div>
+                    <div class="dia-card" data-dia="3">
+                        <h3><button type="button" class="btn-dia" data-dia="3" aria-label="Marcar ou limpar todos os turnos de Quarta">Quarta</button></h3>
+                        <button type="button" class="btn-turno" data-dia="3" data-turno="MANHA" aria-pressed="false">Manhã</button>
+                        <button type="button" class="btn-turno" data-dia="3" data-turno="TARDE" aria-pressed="false">Tarde</button>
+                        <button type="button" class="btn-turno" data-dia="3" data-turno="NOITE" aria-pressed="false">Noite</button>
+                    </div>
+                    <div class="dia-card" data-dia="4">
+                        <h3><button type="button" class="btn-dia" data-dia="4" aria-label="Marcar ou limpar todos os turnos de Quinta">Quinta</button></h3>
+                        <button type="button" class="btn-turno" data-dia="4" data-turno="MANHA" aria-pressed="false">Manhã</button>
+                        <button type="button" class="btn-turno" data-dia="4" data-turno="TARDE" aria-pressed="false">Tarde</button>
+                        <button type="button" class="btn-turno" data-dia="4" data-turno="NOITE" aria-pressed="false">Noite</button>
+                    </div>
+                    <div class="dia-card" data-dia="5">
+                        <h3><button type="button" class="btn-dia" data-dia="5" aria-label="Marcar ou limpar todos os turnos de Sexta">Sexta</button></h3>
+                        <button type="button" class="btn-turno" data-dia="5" data-turno="MANHA" aria-pressed="false">Manhã</button>
+                        <button type="button" class="btn-turno" data-dia="5" data-turno="TARDE" aria-pressed="false">Tarde</button>
+                        <button type="button" class="btn-turno" data-dia="5" data-turno="NOITE" aria-pressed="false">Noite</button>
+                    </div>
+                    <div class="dia-card" data-dia="6">
+                        <h3><button type="button" class="btn-dia" data-dia="6" aria-label="Marcar ou limpar todos os turnos de Sábado">Sábado</button></h3>
+                        <button type="button" class="btn-turno" data-dia="6" data-turno="MANHA" aria-pressed="false">Manhã</button>
+                        <button type="button" class="btn-turno" data-dia="6" data-turno="TARDE" aria-pressed="false">Tarde</button>
+                        <button type="button" class="btn-turno" data-dia="6" data-turno="NOITE" aria-pressed="false">Noite</button>
+                    </div>
+                    <div class="dia-card" data-dia="7">
+                        <h3><button type="button" class="btn-dia" data-dia="7" aria-label="Marcar ou limpar todos os turnos de Domingo">Domingo</button></h3>
+                        <button type="button" class="btn-turno" data-dia="7" data-turno="MANHA" aria-pressed="false">Manhã</button>
+                        <button type="button" class="btn-turno" data-dia="7" data-turno="TARDE" aria-pressed="false">Tarde</button>
+                        <button type="button" class="btn-turno" data-dia="7" data-turno="NOITE" aria-pressed="false">Noite</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Etapa 2: Matérias Prioritárias -->
+            <section class="secao-rotina etapa" id="etapa-2" data-etapa="2" aria-labelledby="titulo-materias" hidden>
+                <div class="secao-topo">
+                    <h2 id="titulo-materias" tabindex="-1">O que merece mais atenção?</h2>
+                    <span class="contador" id="contador-materias">0 matérias selecionadas</span>
+                </div>
+                <p class="legenda">Escolha as matérias na ordem de importância: a 1ª que você tocar terá maior prioridade no cronograma.</p>
+
+                <div id="lista-materias" class="grade-materias" role="group" aria-label="Matérias do vestibular"></div>
+            </section>
+
+            <!-- Feedback e Ações -->
+            <div class="rodape-rotina">
+                <div class="mensagens-rotina">
+                    <p id="rotina-erro" class="msg-erro" role="alert"></p>
+                    <p id="rotina-sucesso" class="msg-sucesso" aria-live="polite"></p>
+                </div>
+                <div class="acoes-rotina">
+                    <button type="button" id="btn-voltar" class="btn-secundario" hidden>Voltar</button>
+                    <button type="button" id="btn-continuar" class="btn-salvar" disabled>Continuar</button>
+                    <button type="submit" id="btn-salvar-rotina" class="btn-salvar" hidden disabled>Salvar rotina</button>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <script src="../src/js/auth.js"></script>
+    <script src="../src/js/navegacao.js"></script>
+    <script src="../src/js/rotina.js"></script>
+</body>
+</html>
