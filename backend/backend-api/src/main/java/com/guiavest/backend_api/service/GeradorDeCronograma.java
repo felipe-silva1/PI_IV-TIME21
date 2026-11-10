@@ -66,9 +66,8 @@ public class GeradorDeCronograma
             return List.of();
 
         // Garante uma segunda-feira válida como base da semana
-        LocalDate segundaFeira = semanaInicio != null
-                ? semanaInicio
-                : LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate segundaFeira = (semanaInicio != null ? semanaInicio : LocalDate.now())
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
         // 1. Limpa duplicatas mantendo a ordem e ordena os turnos cronologicamente
         List<TurnoLivre> turnosOrdenados = ordenarTurnos(disponibilidade);
