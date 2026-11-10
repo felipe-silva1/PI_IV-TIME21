@@ -201,6 +201,18 @@ public class SupervisoraDeConexao extends Thread
                                 RespostaDeConta.BANCO_INDISPONIVEL, null, null, null));
                     }
                 }
+                else if (comunicado instanceof PedidoParaSalvarRotina pedido)
+                {
+                    this.repositorio.registrar ("PEDIDO_PARA_SALVAR_ROTINA", origem,
+                                                pedido.toString());
+                    this.usuario.receba (this.operacoesDeRotina.salvar (pedido));
+                }
+                else if (comunicado instanceof PedidoParaBuscarRotina pedido)
+                {
+                    this.repositorio.registrar ("PEDIDO_PARA_BUSCAR_ROTINA", origem,
+                                                pedido.toString());
+                    this.usuario.receba (this.operacoesDeRotina.buscar (pedido));
+                }
                 else if (comunicado instanceof PedidoParaSair)
                     break;
                 else
