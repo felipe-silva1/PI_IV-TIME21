@@ -26,6 +26,11 @@ public class OperacoesDeCronograma {
     public static final String COLECAO = "blocos_de_estudo";
 
     private static final Set<String> TURNOS = Set.of (TurnoLivre.MANHA, TurnoLivre.TARDE, TurnoLivre.NOITE);
+    
+    // ordem dos turnos dentro de um dia, para devolver o cronograma na
+    // ordem em que vai ser estudado (em ordem alfabetica, NOITE viria
+    // antes de TARDE)
+    private static final List<String> ORDEM_DOS_TURNOS = List.of (TurnoLivre.MANHA, TurnoLivre.TARDE, TurnoLivre.NOITE);
     private MongoCollection<Document> colecao;
 
     public OperacoesDeCronograma (MongoDatabase banco) throws Exception
@@ -52,6 +57,59 @@ public class OperacoesDeCronograma {
         {
             System.err.println("Falha ao criar indices em "+ OperacoesDeCronograma.COLECAO + ": " + erro.getMessage());
         }
+    }
+
+    // busca os blocos do usuario na semana, ordenados por dia e turno.
+    // semana sem nenhum bloco devolve RespostaDeCronograma com cronograma null:
+    // semana ainda nao gerada e um caso normal, nao um erro
+    public Resposta buscar (PedidoParaBuscarCronograma pedido)
+    {
+        String usuarioId    = pedido.getUsuarioId();
+        String semanaInicio = pedido.getSemanaInicio();
+
+        String problema = OperacoesDeCronograma.problemaNaSemana (usuarioId, semanaInicio);
+        if (problema!=null)
+            return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO, problema);
+
+        try
+        {
+            ArrayList<Bloco> blocos = new ArrayList<Bloco> ();
+            for (Document documento : this.colecao.find (
+                     OperacoesDeCronograma.daSemana (new ObjectId (usuarioId), semanaInicio)))
+                blocos.add (OperacoesDeCronograma.deDocumento (documento));
+
+            if (blocos.isEmpty())
+                return new RespostaDeCronograma (null);
+
+            // data em yyyy-MM-dd ordena certo como texto
+            blocos.sort (Comparator.comparing (Bloco::getData)
+                                   .thenComparingInt (bloco ->
+                                       OperacoesDeCronograma.ORDEM_DOS_TURNOS.indexOf (bloco.getTurno())));
+
+            return new RespostaDeCronograma (
+                new Cronograma (usuarioId, semanaInicio, blocos));
+        }
+        catch (Exception erro)
+        {
+            return OperacoesDeCronograma.erroDeBanco ("buscar", erro);
+        }
+    }
+
+    // valida a chave de um cronograma (usuario + semana); usado tanto no
+    // salvar quanto no buscar. devolve null se esta ok
+    private static String problemaNaSemana (String usuarioId, String semanaInicio)
+    {
+        if (usuarioId==null || !ObjectId.isValid (usuarioId))
+            return "usuarioId invalido: " + usuarioId;
+
+        LocalDate segunda = OperacoesDeCronograma.dataOuNull (semanaInicio);
+        if (segunda==null)
+            return "semanaInicio invalida: " + semanaInicio;
+
+        if (segunda.getDayOfWeek()!=DayOfWeek.MONDAY)
+            return "semanaInicio nao e segunda-feira: " + semanaInicio;
+
+        return null;
     }
 
     // regra de "regerar" do dicionario: apaga os blocos que o usuario ja
@@ -102,16 +160,13 @@ public class OperacoesDeCronograma {
     {
         if (cronograma==null)
             return "cronograma ausente";
-        if(cronograma.getUsuarioId()==null || !ObjectId.isValid (cronograma.getUsuarioId()))
-            return "usuarioId invalido: " + cronograma.getUsuarioId();
+
+        String problema = OperacoesDeCronograma.problemaNaSemana (cronograma.getUsuarioId(),
+                                                                  cronograma.getSemanaInicio());
+        if (problema!=null)
+            return problema;
 
         LocalDate segunda = OperacoesDeCronograma.dataOuNull (cronograma.getSemanaInicio());
-        if (segunda==null)
-            return "semanaInicio invalida: "+cronograma.getSemanaInicio();
-
-        if (segunda.getDayOfWeek()!=DayOfWeek.MONDAY)
-            return "semanaInicio nao e segunda-feira: "+cronograma.getSemanaInicio();
-
         List<Bloco> blocos = cronograma.getBlocos();
         if (blocos==null || blocos.isEmpty())
             return "cronograma sem nenhum bloco";

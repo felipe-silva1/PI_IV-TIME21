@@ -224,6 +224,12 @@ public class SupervisoraDeConexao extends Thread
                                                 pedido.toString());
                     this.usuario.receba (this.operacoesDeCronograma.salvar (pedido));
                 }
+                else if (comunicado instanceof PedidoParaBuscarCronograma pedido)
+                {
+                    this.repositorio.registrar ("PEDIDO_PARA_BUSCAR_CRONOGRAMA", origem,
+                                                pedido.toString());
+                    this.usuario.receba (this.operacoesDeCronograma.buscar (pedido));
+                }
                 else if (comunicado instanceof PedidoParaSair)
                     break;
                 else
