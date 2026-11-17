@@ -27,10 +27,11 @@ public class SupervisoraDeConexao extends Thread
     private ArrayList<Parceiro>    usuarios;
     private RepositorioDeChamadas  repositorio;
     private OperacoesDeRotina      operacoesDeRotina;
+    private OperacoesDeCronograma  operacoesDeCronograma;
 
     public SupervisoraDeConexao
     (Socket conexao, ArrayList<Parceiro> usuarios, RepositorioDeChamadas repositorio,
-     OperacoesDeRotina operacoesDeRotina)
+     OperacoesDeRotina operacoesDeRotina, OperacoesDeCronograma operacoesDeCronograma)
     throws Exception
     {
         if (conexao==null)
@@ -45,10 +46,14 @@ public class SupervisoraDeConexao extends Thread
         if (operacoesDeRotina==null)
             throw new Exception ("Operacoes de rotina ausentes");
 
+        if (operacoesDeCronograma==null)
+            throw new Exception ("Operacoes de cronograma ausentes");
+
         this.conexao           = conexao;
         this.usuarios          = usuarios;
         this.repositorio       = repositorio;
         this.operacoesDeRotina = operacoesDeRotina;
+        this.operacoesDeCronograma = operacoesDeCronograma;
     }
 
     public void run ()
@@ -212,6 +217,12 @@ public class SupervisoraDeConexao extends Thread
                     this.repositorio.registrar ("PEDIDO_PARA_BUSCAR_ROTINA", origem,
                                                 pedido.toString());
                     this.usuario.receba (this.operacoesDeRotina.buscar (pedido));
+                }
+                else if (comunicado instanceof PedidoParaSalvarCronograma pedido)
+                {
+                    this.repositorio.registrar ("PEDIDO_PARA_SALVAR_CRONOGRAMA", origem,
+                                                pedido.toString());
+                    this.usuario.receba (this.operacoesDeCronograma.salvar (pedido));
                 }
                 else if (comunicado instanceof PedidoParaSair)
                     break;

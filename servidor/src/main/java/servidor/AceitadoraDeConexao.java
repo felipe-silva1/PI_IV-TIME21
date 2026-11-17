@@ -9,10 +9,11 @@ public class AceitadoraDeConexao extends Thread
     private ArrayList<Parceiro>    usuarios;
     private RepositorioDeChamadas  repositorio;
     private OperacoesDeRotina      operacoesDeRotina;
+    private OperacoesDeCronograma  operacoesDeCronograma;
 
     public AceitadoraDeConexao
     (String porta, ArrayList<Parceiro> usuarios, RepositorioDeChamadas repositorio,
-     OperacoesDeRotina operacoesDeRotina)
+     OperacoesDeRotina operacoesDeRotina, OperacoesDeCronograma operacoesDeCronograma)
     throws Exception
     {
         if (porta==null)
@@ -37,9 +38,13 @@ public class AceitadoraDeConexao extends Thread
         if (operacoesDeRotina==null)
             throw new Exception ("Operacoes de rotina ausentes");
 
+        if (operacoesDeCronograma==null)
+            throw new Exception ("Operacoes de cronograma ausentes");
+
         this.usuarios          = usuarios;
         this.repositorio       = repositorio;
         this.operacoesDeRotina = operacoesDeRotina;
+        this.operacoesDeCronograma = operacoesDeCronograma;
     }
 
     public void run ()
@@ -64,7 +69,7 @@ public class AceitadoraDeConexao extends Thread
             {
                 SupervisoraDeConexao supervisoraDeConexao =
                 new SupervisoraDeConexao (conexao, this.usuarios, this.repositorio,
-                                          this.operacoesDeRotina);
+                                          this.operacoesDeRotina, this.operacoesDeCronograma);
                 supervisoraDeConexao.start();
             }
             catch (Exception erro)
