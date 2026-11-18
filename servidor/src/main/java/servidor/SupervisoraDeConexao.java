@@ -230,6 +230,18 @@ public class SupervisoraDeConexao extends Thread
                                                 pedido.toString());
                     this.usuario.receba (this.operacoesDeCronograma.buscar (pedido));
                 }
+                else if (comunicado instanceof PedidoParaBuscarTarefas pedido)
+                {
+                    this.repositorio.registrar ("PEDIDO_PARA_BUSCAR_TAREFAS", origem,
+                                                pedido.toString());
+                    this.usuario.receba (this.operacoesDeCronograma.buscarTarefas (pedido));
+                }
+                else if (comunicado instanceof PedidoParaAtualizarTarefa pedido)
+                {
+                    this.repositorio.registrar ("PEDIDO_PARA_ATUALIZAR_TAREFA", origem,
+                                                pedido.toString());
+                    this.usuario.receba (this.operacoesDeCronograma.atualizarTarefa (pedido));
+                }
                 else if (comunicado instanceof PedidoParaSair)
                     break;
                 else

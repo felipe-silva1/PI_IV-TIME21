@@ -6,6 +6,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -92,6 +93,86 @@ public class OperacoesDeCronograma {
         catch (Exception erro)
         {
             return OperacoesDeCronograma.erroDeBanco ("buscar", erro);
+        }
+    }
+
+    // retorna os blocos do usuario que estao na data informada. no checklist
+    // uma data sem tarefas e um resultado normal (lista vazia).
+    public Resposta buscarTarefas (PedidoParaBuscarTarefas pedido)
+    {
+        String usuarioId = pedido.getUsuarioId();
+        String data = pedido.getData();
+
+        if (usuarioId==null || !ObjectId.isValid (usuarioId))
+            return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                       "usuarioId invalido: " + usuarioId);
+
+        if (OperacoesDeCronograma.dataOuNull (data)==null)
+            return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                       "data invalida: " + data);
+
+        try
+        {
+            ArrayList<Bloco> tarefas = new ArrayList<Bloco> ();
+            for (Document documento : this.colecao.find (
+                     Filters.and (Filters.eq ("usuarioId", new ObjectId (usuarioId)),
+                                  Filters.eq ("data", data))))
+                tarefas.add (OperacoesDeCronograma.deDocumento (documento));
+
+            tarefas.sort (Comparator.comparingInt (
+                tarefa -> OperacoesDeCronograma.ORDEM_DOS_TURNOS.indexOf (tarefa.getTurno())));
+
+            return new RespostaDeTarefas (tarefas);
+        }
+        catch (Exception erro)
+        {
+            return OperacoesDeCronograma.erroDeBanco ("buscar tarefas", erro);
+        }
+    }
+
+    // atualiza somente o status do bloco identificado, garantindo que ele
+    // pertence ao usuario que fez o pedido.
+    public Resposta atualizarTarefa (PedidoParaAtualizarTarefa pedido)
+    {
+        String usuarioId = pedido.getUsuarioId();
+        String tarefaId = pedido.getTarefaId();
+
+        if (usuarioId==null || !ObjectId.isValid (usuarioId))
+            return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                       "usuarioId invalido: " + usuarioId);
+
+        if (tarefaId==null || !ObjectId.isValid (tarefaId))
+            return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                       "tarefaId invalido: " + tarefaId);
+
+        try
+        {
+            Bson filtro = Filters.and (Filters.eq ("_id", new ObjectId (tarefaId)),
+                                       Filters.eq ("usuarioId", new ObjectId (usuarioId)));
+
+            Document atual = pedido.isConcluido ()
+                ? this.colecao.findOneAndUpdate (
+                    filtro,
+                    Updates.combine (Updates.set ("concluido", true),
+                                     Updates.set ("concluidoEm", new Date ())),
+                    new com.mongodb.client.model.FindOneAndUpdateOptions ()
+                        .returnDocument (com.mongodb.client.model.ReturnDocument.AFTER))
+                : this.colecao.findOneAndUpdate (
+                    filtro,
+                    Updates.combine (Updates.set ("concluido", false),
+                                     Updates.set ("concluidoEm", null)),
+                    new com.mongodb.client.model.FindOneAndUpdateOptions ()
+                        .returnDocument (com.mongodb.client.model.ReturnDocument.AFTER));
+
+            if (atual==null)
+                return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                           "tarefa nao encontrada");
+
+            return new RespostaDeTarefa (OperacoesDeCronograma.deDocumento (atual));
+        }
+        catch (Exception erro)
+        {
+            return OperacoesDeCronograma.erroDeBanco ("atualizar tarefa", erro);
         }
     }
 
