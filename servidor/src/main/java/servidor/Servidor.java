@@ -38,10 +38,12 @@ public class Servidor {
 
         RepositorioDeChamadas repositorio       = null;
         OperacoesDeRotina     operacoesDeRotina = null;
+        OperacoesDeCronograma operacoesDeCronograma = null;
         try
         {
             repositorio       = new RepositorioDeChamadas(mongoUri, RepositorioDeChamadas.BANCO_PADRAO);
             operacoesDeRotina = new OperacoesDeRotina(repositorio.getBanco(Servidor.BANCO_GUIAVEST));
+            operacoesDeCronograma = new OperacoesDeCronograma(repositorio.getBanco(Servidor.BANCO_GUIAVEST));
         }
         catch (Exception erro)
         {
@@ -54,7 +56,8 @@ public class Servidor {
         AceitadoraDeConexao aceitadoraDeConexao = null;
         try
         {
-            aceitadoraDeConexao = new AceitadoraDeConexao(porta, usuarios, repositorio, operacoesDeRotina);
+            aceitadoraDeConexao = new AceitadoraDeConexao(porta, usuarios, repositorio, operacoesDeRotina,
+                                                          operacoesDeCronograma);
             aceitadoraDeConexao.start();
         }
         catch (Exception erro)
@@ -67,6 +70,7 @@ public class Servidor {
         System.out.println("O servidor esta ativo na porta " + porta);
         repositorio.registrar("SERVIDOR_INICIADO", "local", "porta=" + porta);
         operacoesDeRotina.garantirIndices();
+        operacoesDeCronograma.garantirIndices();
 
         for(;;)
         {
