@@ -157,6 +157,36 @@
     overflow-wrap: anywhere;
 }
 
+.painel-tarefa-rotulo {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--espaco-2);
+    cursor: pointer;
+}
+
+.painel-tarefa-checkbox {
+    flex: none;
+    width: 1rem;
+    height:  1rem;
+    margin-top: var(--espaco-1);
+    accent-color: var(--sucesso);
+}
+
+.painel-tarefa-checkbox:focus-visible {
+    outline: 2px solid var(--azul-primario);
+    outline-offset: 2px;
+}
+
+.painel-tarefa-detalhes {
+    display: grid;
+    gap: var(--espaco-1);
+    min-width: 0;
+}
+
+.painel-tarefa.concluida .painel-tarefa-materia {
+    text-decoration: line-through;
+}
+
 .painel-tarefa-topicos {
     padding-inline-start: var(--espaco-5);
 }

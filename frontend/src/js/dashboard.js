@@ -29,13 +29,35 @@
         const item = document.createElement('li');
         item.className = 'painel-tarefa';
 
+        const rotulo = document.createElement('label');
+        rotulo.className = 'painel-tarefa-rotulo';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'painel-tarefa-checkbox';
+        checkbox.checked = tarefa.concluido === true;
+
+        const detalhes = document.createElement('span');
+        detalhes.className = 'painel-tarefa-detalhes';
+
         const materia = document.createElement('strong');
+        materia.className = 'painel-tarefa-materia';
         materia.textContent = tarefa.materia;
 
-        const turno = document.createElement('small');
-        turno.textContent = TURNOS[tarefa.turno] ?? tarefa.turno;
+        const turno = TURNOS[tarefa.turno] ?? tarefa.turno;
+        const estado = document.createElement('small');
 
-        item.append(materia, turno);
+        function atualizarVisual() {
+            item.classList.toggle('concluida', checkbox.checked);
+            estado.textContent = `${turno} · ${checkbox.checked ? 'Concluída' : 'Pendente'}`
+        }
+
+        checkbox.addEventListener('change', atualizarVisual);
+        atualizarVisual();
+
+        detalhes.append(materia, estado);
+        rotulo.append(checkbox, detalhes);
+        item.append(rotulo);
 
         const topicos = tarefa.topicos ?? [];
         if(topicos.length > 0) {
