@@ -6,6 +6,7 @@
     <title>GuiaVest - Cronograma</title>
     <link rel="stylesheet" href="../src/css/base.css">
     <link rel="stylesheet" href="../src/css/layout.css">
+    <link rel="stylesheet" href="../src/css/cronograma.css">
 </head>
 <body>
     <header class="topo">
@@ -18,13 +19,32 @@
         </nav>
     </header>
 
-    <main class="conteudo">
-        <h1>Cronograma</h1>
-        <div class="grade">
+    <main class="conteudo cronograma">
+        <div class="cronograma-cabecalho">
+            <h1>Cronograma</h1>
             <button type="button" class="botao" data-pagina="dashboard.html">Ir para dashboard</button>
         </div>
+        <section aria-labelledby="cronograma-periodo">
+            <div class="cronograma-navegacao">
+                <button type="button" class="botao" id="semana-anterior">← Anterior</button>
+
+                <h2 id="cronograma-periodo" aria-live="polite"></h2>
+                
+                <button type="button" class="botao" id="semana-proxima">Próxima →</button>
+            </div>
+            <div class="cronograma-retorno">
+                <p id="cronograma-mensagem" role="status"></p>
+
+                <button type="button" class="botao" id="gerar-cronograma" hidden>Gerar cronograma</button>
+
+                <button type="button" class="botao" id="recarregar-cronograma" hidden>Tentar novamente</button>
+            </div>
+            <div class="cronograma-semana" id="cronograma-semana" hidden></div>
+        </section>
     </main>
 
     <script src="../src/js/navegacao.js"></script>
+    <script src="../src/js/auth.js"></script>
+    <script src="../src/js/cronograma.js"></script>
 </body>
 </html>
