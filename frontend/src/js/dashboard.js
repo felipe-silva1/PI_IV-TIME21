@@ -13,8 +13,8 @@
     const semanaDias = document.querySelector('#semana-dias');
     const semanaStatus = document.querySelector('#semana-status');
     const semanaRolagem = document.querySelector('#semana-rolagem');
-    const semanaLegenda = document.querySelector('#semana-legenda')
-
+    const semanaLegenda = document.querySelector('#semana-legenda');
+    let consultaDaSemana;
 
     const lista = document.querySelector('#tarefas-lista');
     const status = document.querySelector('#tarefas-status');
@@ -35,7 +35,8 @@
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'painel-tarefa-checkbox';
-        checkbox.checked = tarefa.concluido === true;
+        let concluidaSalva = tarefa.concluido === true;
+        checkbox.checked = concluidaSalva;
 
         const detalhes = document.createElement('span');
         detalhes.className = 'painel-tarefa-detalhes';
@@ -49,22 +50,72 @@
 
         function atualizarVisual() {
             item.classList.toggle('concluida', checkbox.checked);
-            estado.textContent = `${turno} · ${checkbox.checked ? 'Concluída' : 'Pendente'}`
+            estado.textContent = `${turno} · ${checkbox.checked ? 'Concluída' : 'Pendente'}`;
         }
 
-        checkbox.addEventListener('change', atualizarVisual);
+        const erroAoSalvar = document.createElement('small');
+        erroAoSalvar.setAttribute('role', 'status');
+
+        checkbox.addEventListener('change', async () => {
+            const concluido = checkbox.checked;
+            checkbox.disabled = true;
+            erroAoSalvar.textContent = '';
+            atualizarVisual();
+
+            try {
+                const tarefaId = encodeURIComponent(tarefa.id);
+                const resposta = await requisicaoAutenticada(
+                    `${API_TAREFAS}/${tarefaId}/status`,
+                    {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ concluido })
+                    }
+                );
+
+                if (resposta.status === 401) {
+                    limparSessao();
+                    location.replace('../login.html');
+                    return;
+                }
+
+                if (!resposta.ok) {
+                    const mensagem = await mensagemDeErro(resposta).catch(
+                        () => 'Não foi possível salvar o estado da tarefa.'
+                    );
+                    throw new Error(mensagem);
+                }
+
+                const tarefaAtualizada = await resposta.json();
+                concluidaSalva = tarefaAtualizada.concluido === true;
+                checkbox.checked = concluidaSalva;
+                atualizarVisual();
+            } catch (erro) {
+                checkbox.checked = concluidaSalva;
+                atualizarVisual();
+                erroAoSalvar.textContent = erro instanceof TypeError
+                    ? 'Não foi possível confirmar a alteração. Tente novamente.'
+                    : erro.message;
+                return;
+            } finally {
+                checkbox.disabled = false;
+            }
+
+            carregarResumoDaSemana();
+        });
+
         atualizarVisual();
 
         detalhes.append(materia, estado);
         rotulo.append(checkbox, detalhes);
-        item.append(rotulo);
+        item.append(rotulo, erroAoSalvar);
 
         const topicos = tarefa.topicos ?? [];
-        if(topicos.length > 0) {
+        if (topicos.length > 0) {
             const listaTopicos = document.createElement('ul');
             listaTopicos.className = 'painel-tarefa-topicos';
 
-            for (const topicos of topicos) {
+            for (const topico of topicos) {
                 const itemTopico = document.createElement('li');
                 itemTopico.textContent = topico.nome;
                 listaTopicos.append(itemTopico);
@@ -96,7 +147,7 @@
 
             if(!resposta.ok) {
                 const mensagem = await mensagemDeErro(resposta).catch(
-                    () => 'Não foi possível carregas as tarefas de hoje.'
+                    () => 'Não foi possível carregar as tarefas de hoje.'
                 );
                 throw new Error(mensagem);
             }
@@ -179,6 +230,9 @@
     }
 
     async function carregarResumoDaSemana() {
+        consultaDaSemana?.abort();
+        consultaDaSemana = new AbortController();
+        const { signal } = consultaDaSemana;
         const hoje = new Date();
         const hojeISO = dataLocalISO(hoje);
         const segunda = somarDias(hoje, -((hoje.getDay() + 6) % 7));
@@ -187,7 +241,12 @@
         semanaStatus.textContent = 'Carregando cronograma…';
 
         try {
-            const resposta = await requisicaoAutenticada(`${API_CRONOGRAMAS}?${parametros}`);
+            const resposta = await requisicaoAutenticada(
+                `${API_CRONOGRAMAS}?${parametros}`,
+                { signal }
+            );
+
+            if (signal.aborted) return;
 
             if (resposta.status === 401) {
                 limparSessao();
@@ -208,9 +267,11 @@
             }
 
             const cronograma = await resposta.json();
+            if (signal.aborted) return;
             renderizarSemana(segunda, hojeISO, cronograma.blocos ?? []);
             semanaStatus.textContent = '';
         } catch (erro) {
+            if (signal.aborted) return;
             semanaStatus.textContent = erro instanceof TypeError
                 ? 'Não foi possível conectar à API.'
                 : erro.message;
