@@ -198,6 +198,7 @@
     }
 
     function renderizarSemana(segunda, hojeISO, blocos) {
+        let totalLinhas = 1;
         const dias = DIAS_SEMANA.map((nome, indice) => {
             const data = dataLocalISO(somarDias(segunda, indice));
 
@@ -219,13 +220,14 @@
             const blocosDoDia = blocos
                 .filter(bloco => bloco.data === data)
                 .sort((a, b) => ORDEM_TURNOS.indexOf(a.turno) - ORDEM_TURNOS.indexOf(b.turno));
-
+            totalLinhas = Math.max(totalLinhas, blocosDoDia.length);
             lista.append(...blocosDoDia.map(bloco => criarBlocoDaSemana(bloco, hojeISO)));
             dia.append(titulo, lista);
 
             return dia;
         });
 
+        semanaDias.style.setProperty('--linhas-semana', totalLinhas);
         semanaDias.replaceChildren(...dias);
         semanaRolagem.hidden = false;
         semanaLegenda.hidden = false;
