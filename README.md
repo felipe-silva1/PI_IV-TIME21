@@ -26,6 +26,7 @@ O GuiaVest centraliza essa rotina em uma única ferramenta. O estudante informa 
 - Histórico de simulados, com notas e taxa de acertos para recalibrar as disciplinas com mais dificuldade.
 - Temporizador de estudos no estilo Pomodoro.
 - Lembretes automáticos por e-mail ou pelo navegador.
+- Exclusão de conta pelo estudante, após definir e implementar a remoção dos dados associados (perfil e cronograma).
 
 ## Arquitetura
 
@@ -189,7 +190,6 @@ Com o backend em execução, teste a aplicação acessando [`http://localhost:80
 }
 ```
 
-<<<<<<< HEAD
 Se o servidor estiver desligado, o endpoint continua respondendo com
 `status: "DOWN"` e a tela inicial mostra a indisponibilidade sem interromper a
 interface. Se apenas o MongoDB estiver indisponível, o status será
@@ -200,20 +200,21 @@ interface. Se apenas o MongoDB estiver indisponível, o status será
 O backend oferece `POST /api/auth/register` e `POST /api/auth/login`, ambos
 recebendo JSON. O cadastro exige `nome`, `email` e `senha`; a confirmação de
 senha é validada no navegador. Contas são armazenadas na coleção `usuarios` do
-banco `servidor`, com senha protegida por BCrypt. O login responde com um token
-de sessão; o frontend o mantém em `sessionStorage` e pode enviá-lo nas próximas
-requisições como `Authorization: Bearer <token>`. `GET /api/auth/session`
-valida o token e `DELETE /api/auth/session` encerra a sessão.
+banco `servidor`, com senha protegida por hash BCrypt. O formulário solicita
+somente um nome de exibição, e-mail e senha; não solicita data de nascimento.
+A exclusão de conta pelo estudante está planejada para o pós-MVP, quando a
+remoção dos dados associados puder ser feita em cascata.
+
+O login responde com um token de sessão; o frontend o mantém em
+`sessionStorage` e pode enviá-lo nas próximas requisições como
+`Authorization: Bearer <token>`. `GET /api/auth/session` valida o token e
+`DELETE /api/auth/session` encerra a sessão.
 
 As sessões expiram após 24 horas e são mantidas em memória pela API; reiniciar
 a API invalida as sessões existentes. Para testar cadastro e login, o MongoDB,
 o servidor de sockets e o backend precisam estar ativos.
 
-=======
-
 ### Servidor
-
-**Servidor**
 
 Servidor Java que recebe conexões do backend por socket, troca objetos com
 `ObjectInputStream` / `ObjectOutputStream` e registra as chamadas recebidas
@@ -232,37 +233,28 @@ no MongoDB (Atlas).
 
 **Configuração**
 
-| Parâmetro | Argumento | Variável de ambiente | Padrão |
-|---|---|---|---|
-| Porta | 1º | `SERVIDOR_PORTA` | `3000` |
-| URI do MongoDB | 2º | `MONGO_URI` | `mongodb://localhost:27017` |
+| Parâmetro | Variável de ambiente | Padrão |
+|---|---|---|
+| Porta | `SERVIDOR_PORTA` | `3000` |
+| URI do MongoDB | `MONGO_URI` | `mongodb://localhost:27017` |
 
-O argumento tem prioridade sobre a variável de ambiente. **Não coloque a URI
-com senha no código nem no Git**: defina-a como variável de ambiente no mesmo
-terminal em que o servidor será iniciado.
+Para Atlas, defina a URI localmente no mesmo terminal em que iniciará o
+servidor. Não a inclua no código, em comandos versionados ou no Git.
+
+```powershell
+$env:MONGO_URI = Read-Host "Cole a URI do MongoDB"
+```
 
 ```bash
-# Linux / Mac
-export MONGO_URI='mongodb+srv://usuario:senha@cluster0.xxxxx.mongodb.net'
-
-# Windows (PowerShell)
-$env:MONGO_URI="mongodb+srv://usuario:senha@cluster0.xxxxx.mongodb.net"
-```
-
-Para adicionar como variável de sistema:
-- Linux (adicione a ~/.bashrc):
-```bash
-   export MONGO_URI='mongodb+srv://usuario:senha@cluster0.xxxxx.mongodb.net'
-```
-- Windows Powershell
-```
-setx MONGO_URI "mongodb+srv://usuario:senha@cluster0.xxxxx.mongodb.net"
+read -r -p "Cole a URI do MongoDB: " MONGO_URI
+export MONGO_URI
 ```
 
 No Atlas, o IP da máquina que roda o servidor precisa estar liberado em
 *Network Access*, e o usuário precisa ser um **Database User** com permissão
-`readWrite` no banco usado pelo servidor. A senha do Database User é diferente
-da senha da conta usada para entrar no site do Atlas.
+`readWrite` nos bancos `servidor` (contas e registros) e `guiavest` (rotinas e
+cronogramas). Não conceda acesso a outros bancos. A senha do Database User é
+diferente da senha da conta usada para entrar no site do Atlas.
 
 #### Usando MongoDB Atlas
 
@@ -271,24 +263,13 @@ da senha da conta usada para entrar no site do Atlas.
 3. Selecione **Java** e copie a URI exibida pelo Atlas.
 4. Em **Security > Database Access**, crie ou confirme o Database User.
 5. Em **Security > Network Access**, adicione o IP da máquina que executará o servidor.
-6. Substitua na URI apenas o usuário e a senha pelos dados do Database User.
+6. Copie a URI fornecida pelo Atlas e defina-a localmente em `MONGO_URI`.
+   Não a compartilhe nem a salve em arquivos do repositório. Se a URI já foi
+   exposta, troque a senha do Database User.
 
-A URI deve conter o endereço real do cluster, e não um exemplo como
-`cluster0.xxxxx.mongodb.net`:
-
-```text
-mongodb+srv://usuario:senha@cluster0.endereco-real.mongodb.net/servidor
-```
-
-Se a senha tiver caracteres especiais, como `@`, `#`, `:` ou `/`, eles devem
-ser codificados na URI (`%40`, `%23`, `%3A` e `%2F`, respectivamente).
-
-No Windows PowerShell, defina a variável antes de iniciar o servidor. O valor
-fica disponível somente naquele terminal:
-
-```powershell
-$env:MONGO_URI='mongodb+srv://usuario:senha@cluster0.endereco-real.mongodb.net/servidor'
-```
+Se precisar inserir manualmente credenciais na URI e a senha contiver
+caracteres especiais, codifique-os (`@` como `%40`, `#` como `%23`, `:` como
+`%3A` e `/` como `%2F`). Prefira usar a URI gerada pelo Atlas.
 
 Para um MongoDB local, não defina `MONGO_URI`; o padrão usado será
 `mongodb://localhost:27017`. Nesse caso, o MongoDB precisa estar rodando na

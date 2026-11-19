@@ -17,7 +17,7 @@ Contas dos estudantes (cadastro e login).
 | Campo | Tipo | Obrigatório | Descrição | Exemplo |
 |---|---|---|---|---|
 | `_id` | ObjectId | Sim (automático) | Identificador do usuário, gerado pelo MongoDB | `65f1c2a4e1b2c3d4e5f60718` |
-| `nome` | string | Sim | Nome do estudante (1 a 100 caracteres) | `Felipe Augusto` |
+| `nome` | string | Sim | Nome de exibição (1 a 100 caracteres); não solicitar nome completo | `Felipe` |
 | `email` | string | Sim | E-mail de login. Único, salvo em minúsculas e sem espaços nas pontas | `ana@exemplo.com` |
 | `senhaHash` | string | Sim | Hash BCrypt da senha. Nunca devolvido ao front | `$2a$10$...` |
 | `criadoEm` | date | Sim | Instante do cadastro | `2026-10-28T12:00:00Z` |
@@ -33,7 +33,7 @@ Contas dos estudantes (cadastro e login).
 
 ```json
 {
-  "nome": "Ana Souza",
+  "nome": "Ana",
   "email": "ana@exemplo.com",
   "senhaHash": "$2a$10$...",
   "criadoEm": "2026-10-28T12:00:00Z"
