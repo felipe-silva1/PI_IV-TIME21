@@ -154,7 +154,9 @@
 
             const tarefas = await resposta.json();
             lista.replaceChildren(...tarefas.map(criarItemTarefa));
-            status.textContent = '';
+            status.textContent = tarefas.length === 0
+                ? 'Você não tem tarefas planejadas para hoje.'
+                : '';
         } catch (erro) {
             status.textContent = erro instanceof TypeError
                 ? 'Não foi possível conectar à API.'
