@@ -60,7 +60,15 @@
 .painel-semana-dias {
     display: grid;
     grid-template-columns: repeat(7, minmax(4.5rem, 1fr));
+    grid-template-rows: auto repeat(var(--linhas-semana, 1), 1fr);
     gap: var(--espaco-2);
+}
+
+.painel-semana-dia {
+    display: grid;
+    grid-row: 1 / -1;
+    grid-template-rows: subgrid;
+    min-width: 0;
 }
 
 .painel-semana-dia h3 {
@@ -74,31 +82,41 @@
     color: var(--azul-primario);
 }
 
-.painel-semana-dia ul,
-.painel-semana-legenda {
+.painel-semana-dia ul {
     display: grid;
-    gap: var(--espaco-1);
+    grid-row: 2 / -1;
+    grid-template-rows: subgrid;
     list-style: none;
 }
 
-.painel-semana-bloco {
-    padding: var(--espaco-1) var(--espaco-2);
-    border-radius: var(--raio);
-    background: var(--azul-secundario);
-    color: var(--fundo);
-    font-size: 0.75rem;
-    overflow-wrap: anywhere;
+.painel-semana-bloco,
+.painel-semana-marca {
+    --cor-estado: var(--azul-secundario);
 }
 
 .painel-semana-bloco.concluido,
 .painel-semana-marca.concluido {
-    background: var(--sucesso);
+    --cor-estado: var(--sucesso);
 }
-
 
 .painel-semana-bloco.atrasado,
 .painel-semana-marca.atrasado {
-    background: var(--alerta);
+    --cor-estado: var(--alerta);
+}
+
+.painel-semana-bloco {
+    display: grid;
+    align-content: center;
+    min-block-size: calc(2.5em + var(--espaco-1) + var(--espaco-1));
+    padding: var(--espaco-1) var(--espaco-2);
+    border-inline-start: 3px solid var(--cor-estado);
+    border-radius: var(--raio);
+    background: var(--subfundo);
+    background: color-mix(in srgb, var(--cor-estado) 18%, var(--subfundo));
+    color: var(--texto);
+    font-size: 0.75rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
 }
 
 .painel-semana-legenda {
@@ -108,6 +126,7 @@
     margin-bottom: var(--espaco-3);
     color: var(--texto-suave);
     font-size: 0.75rem;
+    list-style: none;
 }
 
 .painel-semana-marca {
@@ -116,6 +135,8 @@
     height: 0.65rem;
     border-radius: 50%;
     background: var(--azul-secundario);
+    background: var(--cor-estado);
+
 }
 
 .painel-semana-detalhes {
