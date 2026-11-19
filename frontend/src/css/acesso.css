@@ -30,6 +30,7 @@
 .caixa { width: 100%; max-width: 340px; }
 .caixa h2 { font-size: 1.5rem; margin-bottom: var(--espaco-1); }
 .caixa .sub { font-size: .75rem; color: var(--texto-suave); margin-bottom: var(--espaco-5); }
+.privacidade { margin-top: var(--espaco-4); font-size: .7rem; line-height: 1.45; color: var(--texto-suave); }
 
 form { display: none; }
 form.ativo { display: block; }

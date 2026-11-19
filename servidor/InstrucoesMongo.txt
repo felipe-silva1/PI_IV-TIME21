@@ -1,15 +1,23 @@
-Para realizar a conexão com o banco, servidor precisa da variavel MONGO_URI (string de conexão mongoDB).
+Para conectar ao MongoDB Atlas:
 
-A string pode ser inserida por meio de args ao rodar o programa, porém para facilitar é recomendado colocar sua string de conexão por variavel de ambiente:
-1- No atlas, é necessário permitir o IP da maquina que terá acesso ao banco
-2- Crie um usuario no mongoDB, na parte Database & Network Access. Lá, defina seu usuario e senha, e coloque um Built-in role: Read/Write to any database.
-3- Copie a sua string de conexão, com usuario e senha. Para defini-lá como variavel de ambiente use:
+1. Em **Network Access**, libere o IP da máquina que executará o servidor.
+2. Em **Database Access**, crie um Database User (usuário do banco, não da
+   conta Atlas) com permissão `readWrite` somente nos bancos `servidor`
+   (contas e registros) e `guiavest` (rotinas e cronogramas).
+3. Em **Connect > Drivers > Java**, copie a URI de conexão desse usuário.
 
-    Windows powershell:
-        setx MONGO_URI "mongodb+srv://usuario:senha@cluster0.xxxxx.mongodb.net"
+O servidor lê a URI da variável de ambiente `MONGO_URI`. Defina-a no terminal
+em que iniciará o servidor; não a inclua em código, argumentos ou arquivos
+versionados.
 
-    Linux:
-        Adicionar a ~/.bashrc:
-            export MONGO_URI='mongodb+srv://usuario:senha@cluster0.xxxxx.mongodb.net'
+Windows PowerShell:
 
-Isso permitirá que você possa usar a mesma conection string toda vez sem ter que ficar colando ela ao rodar o servidor.
+    $env:MONGO_URI = Read-Host "Cole a URI do MongoDB"
+
+Linux ou macOS:
+
+    read -r -p "Cole a URI do MongoDB: " MONGO_URI
+    export MONGO_URI
+
+Para MongoDB local, deixe `MONGO_URI` indefinida; o servidor usa
+`mongodb://localhost:27017`.

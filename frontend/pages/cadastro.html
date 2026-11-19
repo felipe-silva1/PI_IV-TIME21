@@ -30,8 +30,8 @@
           <h2>Criar conta</h2>
           <p class="sub">Leva menos de 2 minutos</p>
 
-          <label for="c-nome">Nome completo</label>
-          <input id="c-nome" type="text" placeholder="Como você se chama?" autocomplete="name" required>
+          <label for="c-nome">Nome de exibição</label>
+          <input id="c-nome" type="text" placeholder="Como você quer ser chamado?" autocomplete="nickname" required>
 
           <label for="c-email">E-mail</label>
           <input id="c-email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required>
@@ -41,6 +41,12 @@
 
           <label for="c-conf">Confirmar senha</label>
           <input id="c-conf" type="password" placeholder="Digite novamente" autocomplete="new-password" required>
+
+          <p class="privacidade">
+            Privacidade: guardamos seu nome de exibição, e-mail, hash da senha e dados de estudos
+            para proteger sua conta e montar seu cronograma. Não pedimos data de nascimento.
+            A exclusão da conta pelo estudante está prevista para o pós-MVP.
+          </p>
 
           <p class="erro" id="c-erro" role="alert"></p>
           <button class="principal" type="submit">Criar conta</button>
