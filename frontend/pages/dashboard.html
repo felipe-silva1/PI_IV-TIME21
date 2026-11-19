@@ -6,6 +6,7 @@
     <title>GuiaVest - Dashboard</title>
     <link rel="stylesheet" href="../src/css/base.css">
     <link rel="stylesheet" href="../src/css/layout.css">
+    <link rel="stylesheet" href="../src/css/dashboard.css">
 </head>
 <body>
     <header class="topo">
@@ -17,17 +18,45 @@
             <button type="button" data-pagina="lembretes.html">Lembretes</button>
         </nav>
     </header>
-
     <main class="conteudo">
-        <h1>Painel</h1>
-        <div class="grade">
-            <button type="button" class="botao" data-pagina="rotina.html">Configurar / Editar rotina</button>
-            <button type="button" class="botao" data-pagina="lembretes.html">Lembretes</button>
-            <button type="button" class="botao" data-pagina="metas.html">Metas de hoje</button>
-            <button type="button" class="botao" data-pagina="cronograma.html">Ver cronograma completo</button>
+        <div class="painel-cabecalho">
+            <h1>Painel</h1>
+            <button type="button" class="botao" data-pagina="rotina.html">
+                Configurar / Editar rotina
+            </button>
+        </div>
+        <div class="painel-estudos">
+            <section class="painel-semana" aria-labelledby="titulo-semana">
+                <h2 id="titulo-semana">Cronograma da semana</h2>
+                <p id="semana-status" role="status"></p>
+
+                <div class="painel-semana-rolagem" id="semana-rolagem"
+                     role="region" aria-label="Dias do cronograma semanal"
+                     tabindex="0" hidden>
+                    <div class="painel-semana-dias" id="semana-dias"></div>
+                </div>
+
+                <ul class="painel-semana-legenda" id="semana-legenda" hidden>
+                    <li><span class="painel-semana-marca concluido"></span> Concluído</li>
+                    <li><span class="painel-semana-marca atrasado"></span> Atrasado</li>
+                    <li><span class="painel-semana-marca pendente"></span> Pendente</li>
+                </ul>
+
+                <button type="button" class="botao" data-pagina="cronograma.html">   
+                    Ver cronograma completo
+                </button>
+            </section>
+
+            <section class="painel-tarefas" aria-labelledby="titulo-tarefas">
+                <h2 id="titulo-tarefas">Tarefas de hoje</h2>
+                <p id="tarefas-status" class="legenda" role="status"></p>
+                <ul id="tarefas-lista" class="painel-tarefas-lista"></ul>
+            </section>
         </div>
     </main>
 
     <script src="../src/js/navegacao.js"></script>
+    <script src="../src/js/auth.js"></script>
+    <script src="../src/js/dashboard.js"></script>
 </body>
 </html>

@@ -1,0 +1,198 @@
+/*Autor: Felipe Augusto dos Santos Silva RA: 25003353*/
+
+.painel-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--espaco-3);
+}
+
+.conteudo .painel-cabecalho h1 {
+    margin-bottom: 0;
+}
+
+.painel-estudos {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: var(--espaco-4);
+    margin-top: var(--espaco-5);
+}
+
+.painel-semana,
+.painel-tarefas {
+    min-width: 0;
+    padding: var(--espaco-4);
+    background: var(--card);
+    border: 1px solid var(--subfundo);
+    border-radius: var(--raio-grande);
+}
+
+.painel-semana {
+    display: flex;
+    flex-direction: column;
+}
+
+.painel-semana > .botao {
+    align-self: flex-start;
+    margin-top:auto;
+}
+
+.painel-semana h2 {
+    margin-bottom: var(--espaco-3);
+}
+
+#semana-status {
+    margin-bottom: var(--espaco-3);
+    color: var(--texto-suave);
+}
+
+#semana-status:empty,
+.painel-semana [hidden] {
+    display: none;
+}
+
+.painel-semana-rolagem {
+    overflow-x: auto;
+    margin-bottom: var(--espaco-3);
+}
+
+.painel-semana-dias {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(4.5rem, 1fr));
+    gap: var(--espaco-2);
+}
+
+.painel-semana-dia h3 {
+    margin-bottom: var(--espaco-2);
+    color: var(--texto-suave);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.painel-semana-dia time[aria-currente="date"] {
+    color: var(--azul-primario);
+}
+
+.painel-semana-dia ul,
+.painel-semana-legenda {
+    display: grid;
+    gap: var(--espaco-1);
+    list-style: none;
+}
+
+.painel-semana-bloco {
+    padding: var(--espaco-1) var(--espaco-2);
+    border-radius: var(--raio);
+    background: var(--azul-secundario);
+    color: var(--fundo);
+    font-size: 0.75rem;
+    overflow-wrap: anywhere;
+}
+
+.painel-semana-bloco.concluido,
+.painel-semana-marca.concluido {
+    background: var(--sucesso);
+}
+
+
+.painel-semana-bloco.atrasado,
+.painel-semana-marca.atrasado {
+    background: var(--alerta);
+}
+
+.painel-semana-legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espaco-3);
+    margin-bottom: var(--espaco-3);
+    color: var(--texto-suave);
+    font-size: 0.75rem;
+}
+
+.painel-semana-marca {
+    display: inline-block;
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    background: var(--azul-secundario);
+}
+
+.painel-semana-detalhes {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.painel-semana-rolagem:focus-visible {
+    outline: 2px solid var(--azul-primario);
+    outline-offset: 2px;
+}
+
+.painel-tarefas h2 {
+    margin-bottom: var(--espaco-3);
+}
+
+#tarefas-status:empty {
+    display: none;
+}
+
+.painel-tarefas-lista {
+    display: grid;
+    gap: var(--espaco-2);
+    list-style: none;
+}
+
+.painel-tarefa {
+    display: grid;
+    gap: var(--espaco-1);
+    padding: var(--espaco-3);
+    background: var(--card);
+    border: 1px solid var(--subfundo);
+    border-radius: var(--raio);
+    overflow-wrap: anywhere;
+}
+
+.painel-tarefa-rotulo {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--espaco-2);
+    cursor: pointer;
+}
+
+.painel-tarefa-checkbox {
+    flex: none;
+    width: 1rem;
+    height:  1rem;
+    margin-top: var(--espaco-1);
+    accent-color: var(--sucesso);
+}
+
+.painel-tarefa-checkbox:focus-visible {
+    outline: 2px solid var(--azul-primario);
+    outline-offset: 2px;
+}
+
+.painel-tarefa-detalhes {
+    display: grid;
+    gap: var(--espaco-1);
+    min-width: 0;
+}
+
+.painel-tarefa.concluida .painel-tarefa-materia {
+    text-decoration: line-through;
+}
+
+.painel-tarefa-topicos {
+    padding-inline-start: var(--espaco-5);
+}
+
+@media (max-width: 900px) {
+    .painel-estudos {
+        grid-template-columns: 1fr;
+    }
+}
