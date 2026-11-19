@@ -1,6 +1,7 @@
 /*Autor: Felipe Augusto dos Santos Silva RA: 25003353*/
 (() => {
     const API = 'http://localhost:8080/api/cronogramas';
+    const API_TAREFAS = 'http://localhost:8080/api/tarefas';
     const TURNOS = [
         ['MANHA', 'Manhã'],
         ['TARDE', 'Tarde'],
@@ -41,6 +42,7 @@
 
     const hoje = new Date();
     let segunda = somarDias(hoje, -((hoje.getDay() + 6) %7));
+    let salvamentosPendentes = 0;
 
     function elemento(tag, classe, texto) {
         const no = document.createElement(tag);
@@ -51,14 +53,81 @@
 
     function criarBloco(bloco) {
         const item = elemento('li', 'cronograma-bloco');
-        item.classList.toggle('concluido', bloco.concluido === true);
+        const rotulo = elemento('label', 'cronograma-bloco-rotulo');
+        const checkbox = elemento('input', 'cronograma-bloco-checkbox');
+        const detalhes = elemento('span', 'cronograma-bloco-detalhes');
+        const materia = elemento('strong', '', bloco.materia);
+        const estado = elemento('small');
+        const aviso = elemento('small', 'cronograma-bloco-aviso');
 
-        const status = bloco.concluido ? 'Concluido' : 'Pendente';
-        item.append(
-            elemento('strong', '', bloco.materia),
-            elemento('small', '', `${bloco.duracaoMin} min · ${status}`)
-        );
+        checkbox.type = 'checkbox';
+        aviso.setAttribute('role', 'status');
 
+        let concluidoSalvo = bloco.concluido === true;
+
+        function atualizarVisual() {
+            const status = concluidoSalvo ? 'Concluído' : 'Pendente';
+
+            checkbox.checked = concluidoSalvo;
+            item.classList.toggle('concluido', concluidoSalvo);
+            estado.textContent = `${bloco.duracaoMin} min · ${status}`;
+        }
+
+        checkbox.addEventListener('change', async () => {
+            const concluido = checkbox.checked;
+            checkbox.disabled = true;
+            aviso.textContent = 'Salvando…';
+
+            salvamentosPendentes++;
+            anterior.disabled = true;
+            proxima.disabled = true;
+
+            try {
+                const id = encodeURIComponent(bloco.id);
+                const resposta = await requisicaoAutenticada(
+                    `${API_TAREFAS}/${id}/status`,
+                    {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ concluido })
+                    }
+                );
+
+                if (resposta.status === 401) {
+                    limparSessao();
+                    location.replace('../login.html');
+                    return;
+                }
+
+                if (!resposta.ok) {
+                    const erro = await mensagemDeErro(resposta).catch(
+                        () => 'Não foi possível salvar o estado do bloco.'
+                    );
+                    throw new Error(erro);
+                }
+
+                const blocoAtualizado = await resposta.json();
+                concluidoSalvo = blocoAtualizado.concluido === true;
+                aviso.textContent = '';
+            } catch (erro) {
+                aviso.textContent = erro instanceof TypeError
+                    ? 'Não foi possível confirmar a alteração. Tente novamente.'
+                    : erro.message;
+            } finally {
+                atualizarVisual();
+                checkbox.disabled = false;
+
+                salvamentosPendentes--;
+                anterior.disabled = salvamentosPendentes > 0;
+                proxima.disabled = salvamentosPendentes > 0;
+            }
+        });
+
+        detalhes.append(materia, estado);
+        rotulo.append(checkbox, detalhes);
+        item.append(rotulo, aviso);
+
+        atualizarVisual();
         return item;
     }
 

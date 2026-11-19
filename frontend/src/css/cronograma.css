@@ -94,6 +94,37 @@
     border-inline-start-color: var(--sucesso);
 }
 
+.cronograma-bloco-rotulo {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--espaco-2);
+    min-height: 44px;
+    cursor: pointer;
+}
+
+.cronograma-bloco-checkbox {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    margin-top: var(--espaco-1);
+    accent-color: var(--sucesso);
+}
+
+.cronograma-bloco-checkbox:focus-visible {
+    outline: 2px solid var(--azul-primario);
+    outline-offset: 2px;
+}
+
+.cronograma-bloco-detalhes {
+    display: grid;
+    gap: var(--espaco-1);
+    min-width: 0;
+}
+
+.cronograma-bloco-rotulo:has(.cronograma-bloco-checkbox:disabled) {
+    cursor: wait;
+}
+
 @media (width > 600px) {
     .cronograma-dia {
         display: grid;

@@ -280,6 +280,13 @@
         }
     }
 
+    window.addEventListener('pageshow', (evento) => {
+        if(evento.persisted) {
+            carregarTarefasDeHoje();
+            carregarResumoDaSemana();
+        }
+    });
+
     carregarTarefasDeHoje();
     carregarResumoDaSemana();
 })();
