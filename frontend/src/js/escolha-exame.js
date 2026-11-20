@@ -2,6 +2,8 @@
    ELEMENTOS DA PÁGINA
 ================================= */
 
+/* Autor: Leonardo Tenca RA: 2500239 */
+
 const botoesExame = document.querySelectorAll('[data-exame]');
 const mensagemSelecao = document.getElementById('mensagem-selecao');
 const botaoContinuar = document.getElementById('btn-continuar');
