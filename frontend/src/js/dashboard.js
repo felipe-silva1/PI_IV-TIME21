@@ -7,6 +7,7 @@
         NOITE: 'Noite'
     };
     const API_CRONOGRAMAS = 'http://localhost:8080/api/cronogramas';
+    const API_PROGRESSO = 'http://localhost:8080/api/progresso';
     const DIAS_SEMANA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
     const ORDEM_TURNOS = ['MANHA', 'TARDE', 'NOITE'];
 
@@ -18,6 +19,13 @@
 
     const lista = document.querySelector('#tarefas-lista');
     const status = document.querySelector('#tarefas-status');
+
+    const progressoStatus = document.querySelector('#progresso-status');
+    const progressoPercentual = document.querySelector('#progresso-percentual');
+    const progressoBarra = document.querySelector('#progresso-barra');
+    const progressoTarefas = document.querySelector('#progresso-tarefas');
+    const progressoHoras = document.querySelector('#progresso-horas');
+    let consultaDeProgresso;
 
     function dataLocalISO(data) {
         const mes = String(data.getMonth() + 1).padStart(2, '0');
