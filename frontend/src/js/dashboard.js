@@ -7,6 +7,7 @@
         NOITE: 'Noite'
     };
     const API_CRONOGRAMAS = 'http://localhost:8080/api/cronogramas';
+    const API_PROGRESSO = 'http://localhost:8080/api/progresso';
     const DIAS_SEMANA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
     const ORDEM_TURNOS = ['MANHA', 'TARDE', 'NOITE'];
 
@@ -19,10 +20,28 @@
     const lista = document.querySelector('#tarefas-lista');
     const status = document.querySelector('#tarefas-status');
 
+    const progressoStatus = document.querySelector('#progresso-status');
+    const progressoPercentual = document.querySelector('#progresso-percentual');
+    const progressoBarra = document.querySelector('#progresso-barra');
+    const progressoTarefas = document.querySelector('#progresso-tarefas');
+    const progressoHoras = document.querySelector('#progresso-horas');
+    let consultaDeProgresso;
+
     function dataLocalISO(data) {
         const mes = String(data.getMonth() + 1).padStart(2, '0');
         const dia = String(data.getDate()).padStart(2, '0');
         return `${data.getFullYear()}-${mes}-${dia}`;
+    }
+
+    function somarDias(data, quantidade) {
+        const resultado = new Date(data);
+        resultado.setDate(resultado.getDate() + quantidade);
+        return resultado;
+    }
+
+    function formatarHoras(valor) {
+        const numero = Number(valor ?? 0);
+        return Number.isInteger(numero) ? `${numero}h` : `${numero.toFixed(1)}h`;
     }
 
     function criarItemTarefa(tarefa) {
@@ -102,6 +121,7 @@
             }
 
             carregarResumoDaSemana();
+            carregarProgresso();
         });
 
         atualizarVisual();
@@ -162,12 +182,6 @@
                 ? 'Não foi possível conectar à API.'
                 : erro.message;
         }
-    }
-
-    function somarDias(data, quantidade) {
-        const resultado = new Date(data);
-        resultado.setDate(resultado.getDate() + quantidade);
-        return resultado;
     }
 
     function criarBlocoDaSemana(bloco, hojeISO) {
@@ -282,13 +296,97 @@
         }
     }
 
+    function renderizarProgresso(dados) {
+        const concluidas = Number(dados?.tarefasConcluidas ?? 0);
+        const total = Number(dados?.totalTarefas ?? dados?.tarefasTotais ?? 0);
+        const percentualBruto = dados?.percentualTarefasConcluidas
+            ?? dados?.percentualConclusao
+            ?? (total > 0 ? (concluidas / total) * 100 : 0);
+
+        const percentual = Math.max(0, Math.min(100, Math.round(Number(percentualBruto) || 0)));
+
+        const horasCumpridas = Number(dados?.horasCumpridas ?? 0);
+        const horasPlanejadas = Number(dados?.horasPlanejadas ?? 0);
+        const percentualHoras = Math.max(
+            0,
+            Math.min(100, Math.round(Number(dados?.percentualHorasCumpridas ?? 0) || 0))
+        );
+        if (progressoPercentual) {
+            progressoPercentual.textContent = `${percentual}%`;
+        }
+
+        if (progressoBarra) {
+            progressoBarra.max = 100;
+            progressoBarra.value = percentual;
+            progressoBarra.textContent = `${percentual}%`;
+        }
+
+        if (progressoTarefas) {
+            progressoTarefas.textContent = `${concluidas} de ${total} tarefas concluídas`;
+        }
+
+        if (progressoHoras) {
+            progressoHoras.textContent =
+                `Horas: ${formatarHoras(horasCumpridas)} de ${formatarHoras(horasPlanejadas)} (${percentualHoras}%)`;
+        }
+    }
+
+    async function carregarProgresso() {
+        if (!progressoStatus) return;
+
+        consultaDeProgresso?.abort();
+        consultaDeProgresso = new AbortController();
+        const { signal } = consultaDeProgresso;
+
+        const hoje = new Date();
+        const segunda = somarDias(hoje, -((hoje.getDay() + 6) % 7));
+        const parametros = new URLSearchParams({ semana: dataLocalISO(segunda) });
+
+        progressoStatus.textContent = 'Carregando progresso…';
+
+        try {
+            const resposta = await requisicaoAutenticada(
+                `${API_PROGRESSO}?${parametros}`,
+                { signal }
+            );
+
+            if (signal.aborted) return;
+
+            if (resposta.status === 401) {
+                limparSessao();
+                location.replace('../login.html');
+                return;
+            }
+
+            if (!resposta.ok) {
+                const mensagem = await mensagemDeErro(resposta).catch(
+                    () => 'Não foi possível carregar o progresso semanal.'
+                );
+                throw new Error(mensagem);
+            }
+
+            const dados = await resposta.json();
+            if (signal.aborted) return;
+
+            renderizarProgresso(dados);
+            progressoStatus.textContent = '';
+        } catch (erro) {
+            if (signal.aborted) return;
+            progressoStatus.textContent = erro instanceof TypeError
+                ? 'Não foi possível conectar à API.'
+                : erro.message;
+        }
+    }
+
     window.addEventListener('pageshow', (evento) => {
         if(evento.persisted) {
             carregarTarefasDeHoje();
             carregarResumoDaSemana();
+            carregarProgresso();
         }
     });
 
     carregarTarefasDeHoje();
     carregarResumoDaSemana();
+    carregarProgresso();
 })();

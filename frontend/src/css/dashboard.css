@@ -12,6 +12,29 @@
     margin-bottom: 0;
 }
 
+.painel-progresso {
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+}
+
+.painel-progresso-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.painel-progresso-percentual {
+    font-weight: 700;
+}
+
+.painel-progresso-barra {
+    width: 100%;
+    height: 0.75rem;
+    margin: 0.5rem 0;
+}
+
 .painel-estudos {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
