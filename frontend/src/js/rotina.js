@@ -276,6 +276,8 @@ formRotina.addEventListener('submit', async e => {
             throw new Error(await mensagemDeErro(response));
         }
 
+        location.href = 'dashboard.html';
+
         sucessoEl.textContent = 'Rotina salva com sucesso!';
     } catch (falha) {
         erroEl.textContent = falha.message || 'Não foi possível salvar a rotina na API.';
