@@ -62,12 +62,17 @@ public class CronogramaService
      */
     public void gerarPrimeiroMes(String usuarioId)
     {
-        LocalDate segunda = resolverSegundaFeira(null);
+        LocalDate inicio = LocalDate.now();
+        LocalDate fim = inicio.plusDays(29);
+        LocalDate primeiraSegunda = inicio.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
-        for(int indice = 0; indice < 4; indice++) {
-            String semana = segunda.plusWeeks(indice).toString();
+        for (LocalDate segunda = primeiraSegunda;
+                !segunda.isAfter(fim);
+                segunda = segunda.plusWeeks(1))
+        {
+            String semana = segunda.toString();
 
-            if(buscarDaSemana(usuarioId, semana).isEmpty())
+            if (buscarDaSemana(usuarioId, semana).isEmpty())
             {
                 gerarESalvar(usuarioId, semana);
             }
