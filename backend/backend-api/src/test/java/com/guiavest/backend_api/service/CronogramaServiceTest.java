@@ -1,0 +1,64 @@
+//Autor: Felipe Augusto dos Santos Silva RA: 25003353
+package com.guiavest.backend_api.service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import br.edu.time21.comunicacao.Bloco;
+import br.edu.time21.comunicacao.Cronograma;
+import br.edu.time21.comunicacao.PedidoParaBuscarCronograma;
+import br.edu.time21.comunicacao.PedidoParaSalvarCronograma;
+import br.edu.time21.comunicacao.RespostaDeCronograma;
+import br.edu.time21.comunicacao.Rotina;
+import br.edu.time21.comunicacao.TurnoLivre;
+
+class CronogramaServiceTest
+{
+    @Test
+    void geraApenasSabadoEDomingoNaPrimeiraSemanaQuandoRotinaComecaNoSabado()
+    {
+        String usuarioId = "usuario";
+        ClienteSocket socket = mock(ClienteSocket.class);
+        RotinaService rotinaService = mock(RotinaService.class);
+        CronogramaService servico =
+                new CronogramaService(socket, rotinaService, new GeradorDeCronograma());
+
+        List<TurnoLivre> turnos = IntStream.rangeClosed(1, 7)
+                .mapToObj(dia -> new TurnoLivre(dia, TurnoLivre.MANHA))
+                .toList();
+
+        when(rotinaService.buscarPorUsuario(usuarioId))
+                .thenReturn(Optional.of(
+                        new Rotina(usuarioId, "ENEM", turnos, List.of("Matemática"))));
+        when(socket.enviar(any(PedidoParaBuscarCronograma.class)))
+                .thenReturn(new RespostaDeCronograma(null));
+        when(socket.enviar(any(PedidoParaSalvarCronograma.class)))
+                .thenAnswer(chamada -> {
+                    PedidoParaSalvarCronograma pedido = chamada.getArgument(0);
+                    return new RespostaDeCronograma(pedido.getCronograma());
+                });
+
+        servico.gerarPrimeiroMes(usuarioId, LocalDate.of(2026, 11, 21));
+
+        var gravacoes = forClass(PedidoParaSalvarCronograma.class);
+        verify(socket, atLeastOnce()).enviar(gravacoes.capture());
+
+        Cronograma primeiraSemana = gravacoes.getAllValues().get(0).getCronograma();
+        assertEquals("2026-11-16", primeiraSemana.getSemanaInicio());
+        assertEquals(
+                List.of("2026-11-21", "2026-11-22"),
+                primeiraSemana.getBlocos().stream().map(Bloco::getData).toList()
+        );
+    }
+}
