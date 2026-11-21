@@ -119,7 +119,7 @@ Sem nenhuma saída, as cópias estão iguais.
 | Parte | Tecnologias |
 | --- | --- |
 | Frontend | HTML, CSS, JavaScript |
-| Backend | Java, Spring Boot |
+| Backend | Java 17, Spring Boot 4.1.2 |
 | Servidor | Java, sockets TCP, `ObjectInputStream`/`ObjectOutputStream` |
 | Banco de dados | MongoDB |
 | Prototipação | Figma |
@@ -129,15 +129,15 @@ Sem nenhuma saída, as cópias estão iguais.
 ```text
 PI_IV-TIME21/
 |-- frontend/          interface web
-|   |-- index.html
+|   |-- login.html
 |   `-- src/
-|       |-- css/styles.css
-|       `-- js/app.js
-|-- backend/           API em Java (em desenvolvimento)
+|       |-- css/
+|       `-- js/
+|-- backend/           API em Java com Spring Boot
 |   `-- backend-api/src/main/java/
 |       |-- com/guiavest/backend_api/      API Spring Boot
 |       `-- br/edu/time21/comunicacao/     classes do protocolo (copia)
-|-- servidor/          servidor de sockets em Java + MongoDB (em desenvolvimento)
+|-- servidor/          servidor de sockets em Java + MongoDB
 |   `-- src/main/java/
 |       |-- servidor/                      infraestrutura do servidor
 |       `-- br/edu/time21/comunicacao/     classes do protocolo (copia)
@@ -148,40 +148,119 @@ PI_IV-TIME21/
 ## Requisitos
 
 - JDK 17 ou superior
-- MongoDB
-- VS Code com a extensão Live Server, para servir o frontend durante o desenvolvimento
+- Maven (opcional; os módulos podem usar os Maven Wrappers)
+- MongoDB Community Server ou MongoDB Atlas
+- VS Code com a extensão Live Server para o frontend
 
-## Como executar
+## Como instalar e executar
 
-Quando as três partes estiverem prontas, a ordem de inicialização será: MongoDB, servidor, backend e frontend.
+Inicie os componentes nesta ordem:
 
-| Parte | Porta |
+1. MongoDB;
+2. servidor Java;
+3. backend Spring Boot;
+4. frontend.
+
+| Componente | Endereço ou porta padrão |
 | --- | --- |
-| Frontend (Live Server) | 5500 |
-| Backend | 8080 |
-| Servidor | a definir |
-| MongoDB | 27017 (padrão) |
+| MongoDB local | `mongodb://localhost:27017` |
+| Servidor Java | `localhost:3000` |
+| Backend Spring Boot | `http://localhost:8080` |
+| Frontend Live Server | `http://localhost:5500` |
 
-**Frontend:** abra `frontend/index.html` com o Live Server. A página consulta `http://localhost:8080/api/health` e mostra se o backend está disponível.
+### 1. Instalar e iniciar o MongoDB
 
-### Backend Spring Boot
+Para uma execução totalmente local, instale o **MongoDB Community Server** e confirme que ele está ativo na porta `27017`.
 
-O backend funciona como intermediário entre o frontend e o servidor Java via socket. Para executá-lo pelo VS Code:
-
-1. Certifique-se de ter as extensões **Extension Pack for Java** e **Spring Boot Extension Pack** instaladas.
-2. Abra a pasta `backend/backend-api/` no VS Code.
-3. Aguarde o Maven carregar as dependências. O progresso pode ser acompanhado na barra inferior.
-4. Abra a classe `BackendApiApplication.java`, que contém a anotação `@SpringBootApplication`.
-5. Clique em **Run** acima do método `main` ou use o **Spring Boot Dashboard** na barra lateral.
-6. O backend será iniciado na porta `8080`.
-
-Também é possível executá-lo pelo terminal, a partir da pasta `backend/backend-api/`:
+No Windows, após a instalação padrão como serviço:
 
 ```powershell
+Start-Service MongoDB
+Test-NetConnection localhost -Port 27017
+```
+
+Ou use Docker, caso esteja disponível:
+
+```powershell
+docker run --name guiavest-mongo -p 27017:27017 -d mongo:latest
+docker start guiavest-mongo
+```
+
+No Linux/macOS, o MongoDB pode ser iniciado pelo gerenciador de serviços da instalação ou pelo Docker com o comando acima.
+
+Para usar o MongoDB Atlas, siga a seção **Usando MongoDB Atlas** deste README e informe a URI pela variável de ambiente `MONGO_URI`. Não coloque a senha no repositório.
+
+Os bancos usados pela aplicação são `servidor` e `guiavest`. Veja os campos e coleções em [`docs/dicionario-banco.md`](docs/dicionario-banco.md).
+
+### 2. Iniciar o servidor Java
+
+No Windows, a partir da raiz do projeto:
+
+```powershell
+.\rodar-servidor.bat
+```
+
+O script compila o servidor e o inicia na porta `3000`. Para configurar a porta ou o MongoDB manualmente em outro terminal:
+
+```powershell
+$env:SERVIDOR_PORTA = "3000"
+$env:MONGO_URI = "mongodb://localhost:27017"
+cd servidor
+& "..\backend\backend-api\mvnw.cmd" -f "pom.xml" compile
+& "..\backend\backend-api\mvnw.cmd" -f "pom.xml" exec:java -Dexec.args="3000 $env:MONGO_URI"
+```
+
+No Linux/macOS:
+
+```bash
+./rodar-servidor.sh
+# Ou configure manualmente:
+export SERVIDOR_PORTA=3000
+export MONGO_URI=mongodb://localhost:27017
+cd servidor
+../backend/backend-api/mvnw -f pom.xml compile
+../backend/backend-api/mvnw -f pom.xml exec:java -Dexec.args="3000 $MONGO_URI"
+```
+
+Saída esperada:
+
+```text
+O servidor esta ativo na porta 3000
+```
+
+Para encerrar o servidor, digite `desativar` e pressione Enter.
+
+### 3. Iniciar o backend Spring Boot
+
+Na raiz do projeto, no Windows:
+
+```powershell
+.\rodar-backend.bat
+```
+
+No Linux/macOS:
+
+```bash
+./rodar-backend.sh
+```
+
+Também é possível executar diretamente:
+
+```powershell
+cd backend\backend-api
 .\mvnw.cmd spring-boot:run
 ```
 
-Com o backend em execução, teste a aplicação acessando [`http://localhost:8080/api/health`](http://localhost:8080/api/health). A resposta esperada é semelhante a:
+As configurações do backend podem ser sobrescritas por variáveis de ambiente:
+
+| Configuração | Variável de ambiente | Padrão |
+| --- | --- | --- |
+| Endereço do servidor de sockets | `SERVIDOR_ENDERECO` | `localhost` |
+| Porta do servidor de sockets | `SERVIDOR_PORTA` | `3000` |
+| Timeout do servidor de sockets | `SERVIDOR_TIMEOUT_MS` | `5000` |
+| Porta da API HTTP | `SERVER_PORT` | `8080` |
+
+Com o backend em execução, teste [`http://localhost:8080/api/health`](http://localhost:8080/api/health). A resposta esperada é semelhante a:
 
 ```json
 {
@@ -194,6 +273,17 @@ Se o servidor estiver desligado, o endpoint continua respondendo com
 `status: "DOWN"` e a tela inicial mostra a indisponibilidade sem interromper a
 interface. Se apenas o MongoDB estiver indisponível, o status será
 `"DEGRADED"` e o banco será indicado como indisponível.
+
+### 4. Iniciar o frontend
+
+1. Instale e habilite a extensão **Live Server** no VS Code.
+2. Abra a pasta raiz do projeto no VS Code.
+3. Abra [`frontend/login.html`](frontend/login.html).
+4. Clique com o botão direito no arquivo e escolha **Open with Live Server**, ou use o botão **Go Live**.
+
+Acesse [`http://localhost:5500/frontend/login.html`](http://localhost:5500/frontend/login.html).
+
+O frontend espera o backend em `http://localhost:8080` e aceita o backend pelo navegador nas origens `http://localhost:5500` e `http://127.0.0.1:5500`. Se alterar uma porta, atualize também os valores de `http://localhost:8080` nos arquivos JavaScript do frontend e a configuração de CORS no backend.
 
 ### Cadastro, login e sessão
 
@@ -316,6 +406,30 @@ um único comando, abra um terminal na pasta `backend/backend-api/` e execute:
 ```powershell
 .\mvnw.cmd test
 ```
+
+No Linux/macOS:
+
+```bash
+./mvnw test
+```
+
+Os testes do cronograma e do cálculo de progresso da issue 27 podem ser
+executados separadamente:
+
+```powershell
+.\mvnw.cmd -Dtest=GeradorDeCronogramaTest test
+.\mvnw.cmd -Dtest=CalculadoraDeProgressoSemanalTest test
+```
+
+Também é possível executar os dois conjuntos em um único comando:
+
+```powershell
+.\mvnw.cmd -Dtest=GeradorDeCronogramaTest,CalculadoraDeProgressoSemanalTest test
+```
+
+No Linux/macOS, substitua `.\mvnw.cmd` por `./mvnw`.
+
+Os relatórios completos ficam em `backend/backend-api/target/surefire-reports/`.
 
 ## Protocolo
 
