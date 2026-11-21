@@ -308,6 +308,15 @@ No Linux ou macOS, a forma equivalente, a partir da pasta `servidor`, é:
 ../backend/backend-api/mvnw -f pom.xml exec:java -Dexec.args="3000"
 ```
 
+### Testes unitários
+
+Os testes unitários do backend usam JUnit 5. Para executar todos os testes com
+um único comando, abra um terminal na pasta `backend/backend-api/` e execute:
+
+```powershell
+.\mvnw.cmd test
+```
+
 ## Protocolo
 
 Todas as mensagens herdam de `Comunicado`, no pacote
