@@ -43,6 +43,50 @@
         </section>
     </main>
 
+    <dialog class="cronograma-edicao" id="dialogo-editar-tarefa">
+        <form id="form-editar-tarefa" method="dialog">
+            <h2>Editar tarefa</h2>
+            <input type="hidden" id="editar-tarefa-id">
+
+            <label for="editar-tarefa-data">Dia
+                <input type="date" id="editar-tarefa-data" required>
+            </label>
+
+            <label for="editar-tarefa-turno">Turno
+                <select id="editar-tarefa-turno" required>
+                    <option value="MANHA">Manhã</option>
+                    <option value="TARDE">Tarde</option>
+                    <option value="NOITE">Noite</option>
+                </select>
+            </label>
+
+            <label for="editar-tarefa-materia">Matéria
+                <input type="text" id="editar-tarefa-materia" maxlength="100" required>
+            </label>
+
+            <label for="editar-tarefa-duracao">Duração (minutos)
+                <input type="number" id="editar-tarefa-duracao" min="1" max="1440" required>
+            </label>
+
+            <label for="editar-tarefa-descricao">Descrição
+                <textarea id="editar-tarefa-descricao" maxlength="500" rows="4"
+                    placeholder="O que você precisa fazer nesta tarefa?"></textarea>
+            </label>
+
+            <label class="cronograma-edicao-status">
+                <input type="checkbox" id="editar-tarefa-concluido">
+                Tarefa concluída
+            </label>
+
+            <p id="editar-tarefa-mensagem" role="status"></p>
+
+            <div class="cronograma-edicao-acoes">
+                <button type="button" class="botao" id="cancelar-edicao-tarefa">Cancelar</button>
+                <button type="submit" class="botao botao-primario">Salvar</button>
+            </div>
+        </form>
+    </dialog>
+
     <script src="../src/js/navegacao.js"></script>
     <script src="../src/js/auth.js"></script>
     <script src="../src/js/cronograma.js"></script>
