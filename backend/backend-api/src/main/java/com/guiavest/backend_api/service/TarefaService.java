@@ -69,6 +69,42 @@ public class TarefaService
         throw new TarefaException(503, "Não foi possível atualizar a tarefa.");
     }
 
+    public Bloco atualizar(
+            String usuarioId, String tarefaId, String data, String turno,
+            String materia, Integer duracaoMin, String descricao, Boolean concluido)
+    {
+        validarUsuario(usuarioId);
+
+        if (tarefaId == null || tarefaId.isBlank())
+            throw new TarefaException(400, "Tarefa inválida.");
+        if (!dataValida(data))
+            throw new TarefaException(400, "Data inválida.");
+        if (turno == null || !(turno.equals("MANHA") || turno.equals("TARDE") || turno.equals("NOITE")))
+            throw new TarefaException(400, "Turno inválido.");
+        if (materia == null || materia.isBlank())
+            throw new TarefaException(400, "Informe a matéria.");
+        if (duracaoMin == null || duracaoMin <= 0)
+            throw new TarefaException(400, "A duração deve ser maior que zero.");
+        if (descricao != null && descricao.length() > 500)
+            throw new TarefaException(400, "A descrição pode ter no máximo 500 caracteres.");
+
+        Resposta resposta =
+                this.clienteSocket.enviar(
+                        new PedidoParaAtualizarTarefa(
+                                usuarioId, tarefaId, data, turno, materia.trim(),
+                                duracaoMin, descricao == null ? "" : descricao.trim(),
+                                Boolean.TRUE.equals(concluido)));
+
+        if (resposta instanceof RespostaDeTarefa respostaDeTarefa &&
+            respostaDeTarefa.getTarefa() != null)
+            return respostaDeTarefa.getTarefa();
+
+        if (resposta instanceof RespostaDeErro erro)
+            throw traduzirErro(erro);
+
+        throw new TarefaException(503, "Não foi possível atualizar a tarefa.");
+    }
+
     private static void validarUsuario(String usuarioId)
     {
         if (usuarioId == null || usuarioId.isBlank())

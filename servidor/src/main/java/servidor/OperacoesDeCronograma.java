@@ -150,6 +150,67 @@ public class OperacoesDeCronograma {
             Bson filtro = Filters.and (Filters.eq ("_id", new ObjectId (tarefaId)),
                                        Filters.eq ("usuarioId", new ObjectId (usuarioId)));
 
+            if (pedido.isAtualizacaoCompleta ())
+            {
+                String data = pedido.getData ();
+                String turno = pedido.getTurno ();
+                String materia = pedido.getMateria ();
+                int duracaoMin = pedido.getDuracaoMin ();
+
+                if (OperacoesDeCronograma.dataOuNull (data)==null)
+                    return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                               "data invalida");
+                if (turno==null || !OperacoesDeCronograma.TURNOS.contains (turno))
+                    return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                               "turno invalido");
+                if (OperacoesDeCronograma.vazia (materia))
+                    return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                               "materia ausente");
+                if (duracaoMin<=0)
+                    return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                               "duracaoMin deve ser maior que zero");
+
+                String descricao = pedido.getDescricao ();
+                if (descricao!=null && descricao.length()>500)
+                    return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                               "descricao excede 500 caracteres");
+
+                    Document existente = this.colecao.find(filtro).first();
+                    if (existente==null)
+                        return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                                   "tarefa nao encontrada");
+
+                    LocalDate semanaInicio =
+                        OperacoesDeCronograma.dataOuNull (existente.getString ("semanaInicio"));
+                    LocalDate novaData = OperacoesDeCronograma.dataOuNull (data);
+                    if (semanaInicio==null || novaData==null ||
+                        novaData.isBefore(semanaInicio) ||
+                        novaData.isAfter(semanaInicio.plusDays(6)))
+                        return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                                   "data fora da semana da tarefa");
+
+                Document atual = this.colecao.findOneAndUpdate (
+                    filtro,
+                    Updates.combine (
+                        Updates.set ("data", data),
+                        Updates.set ("turno", turno),
+                        Updates.set ("materia", materia.trim()),
+                        Updates.set ("duracaoMin", duracaoMin),
+                        Updates.set ("descricao", descricao==null ? "" : descricao.trim()),
+                        Updates.set ("concluido", pedido.isConcluido()),
+                        pedido.isConcluido ()
+                            ? Updates.set ("concluidoEm", new Date ())
+                            : Updates.set ("concluidoEm", null)),
+                    new com.mongodb.client.model.FindOneAndUpdateOptions ()
+                        .returnDocument (com.mongodb.client.model.ReturnDocument.AFTER));
+
+                if (atual==null)
+                    return new RespostaDeErro (RespostaDeErro.PEDIDO_INVALIDO,
+                                               "tarefa nao encontrada");
+
+                return new RespostaDeTarefa (OperacoesDeCronograma.deDocumento (atual));
+            }
+
             Document atual = pedido.isConcluido ()
                 ? this.colecao.findOneAndUpdate (
                     filtro,
@@ -333,6 +394,7 @@ public class OperacoesDeCronograma {
                    .append  ("turno",        bloco.getTurno())
                    .append  ("materia",      bloco.getMateria())
                    .append  ("duracaoMin",   bloco.getDuracaoMin())
+                   .append  ("descricao",    bloco.getDescricao())
                    .append  ("topicos",      topicos)
                    .append  ("concluido",    bloco.isConcluido())
                    .append  ("concluidoEm",  concluidoEm);
@@ -354,6 +416,7 @@ public class OperacoesDeCronograma {
                           documento.getString ("turno"),
                           documento.getString ("materia"),
                           documento.get ("duracaoMin", Number.class).intValue(),
+                          documento.getString ("descricao"),
                           topicos,
                           Boolean.TRUE.equals (documento.getBoolean ("concluido")),
                           concluidoEm==null ? 0L : concluidoEm.getTime());

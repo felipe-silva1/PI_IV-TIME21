@@ -90,6 +90,77 @@
     border-radius: var(--raio);
 }
 
+.cronograma-bloco-arrastavel {
+    cursor: grab;
+}
+
+.cronograma-bloco.arrastando {
+    opacity: 0.55;
+}
+
+.cronograma-turno.drag-sobre {
+    background: var(--subfundo);
+    outline: 2px dashed var(--azul-primario);
+}
+
+.cronograma-bloco-acoes {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.cronograma-bloco-editar {
+    border: 0;
+    background: transparent;
+    color: var(--azul-primario);
+    cursor: pointer;
+    font-size: 0.82rem;
+    padding: var(--espaco-1);
+}
+
+.cronograma-edicao {
+    width: min(520px, calc(100vw - 2rem));
+    border: 1px solid var(--subfundo);
+    border-radius: var(--raio);
+    color: var(--texto);
+    background: var(--card);
+}
+
+.cronograma-edicao::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.cronograma-edicao form {
+    display: grid;
+    gap: var(--espaco-3);
+}
+
+.cronograma-edicao label {
+    display: grid;
+    gap: var(--espaco-1);
+}
+
+.cronograma-edicao input,
+.cronograma-edicao select,
+.cronograma-edicao textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.cronograma-edicao-status {
+    display: flex !important;
+    align-items: center;
+}
+
+.cronograma-edicao-status input {
+    width: auto;
+}
+
+.cronograma-edicao-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--espaco-2);
+}
+
 .cronograma-bloco.concluido {
     border-inline-start-color: var(--sucesso);
 }

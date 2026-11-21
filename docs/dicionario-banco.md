@@ -93,6 +93,7 @@ Cada bloco de estudo planejado em um dia e turno. O conjunto de blocos de uma se
 | `turno` | string | Sim | Turno do bloco (enum `turno`) | `NOITE` |
 | `materia` | string | Sim | Matéria estudada (enum `materia`) | `Matemática` |
 | `duracaoMin` | int | Sim | Duração planejada em minutos. Maior que zero | `90` |
+| `descricao` | string | Não | Texto livre com o que será feito no bloco. Até 500 caracteres | `Resolver exercícios de funções` |
 | `topicos` | array de objetos | Sim | Tópicos do bloco. Pode ser vazio | ver abaixo |
 | `topicos[].nome` | string | Sim | Nome do tópico | `Funções` |
 | `topicos[].concluido` | boolean | Sim | Se o tópico foi concluído. Começa como `false` | `false` |

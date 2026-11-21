@@ -18,6 +18,7 @@ public class Bloco implements Serializable
     private String turno; // TurnoLivre.MANHA, TARDE ou NOITE
     private String materia;
     private int duracaoMin; // maior que zero
+    private String descricao;
     private ArrayList<Topico> topicos; // pode ser vazia, nunca null depois de gravado
     private boolean concluido;
     private long concluidoEm; // milissegundos desde 01/01/1970 (UTC); 0 enquanto pendente
@@ -26,15 +27,20 @@ public class Bloco implements Serializable
     //usado pelo backend para montar um cronograma recem-gerado: tudo pendente e ainda sem id
     public Bloco (String data, String turno, String materia, int duracaoMin, List<Topico> topicos)
     {
-        this (null, data, turno, materia, duracaoMin, topicos, false, 0L);
+        this (null, data, turno, materia, duracaoMin, "", topicos, false, 0L);
     }
     public Bloco (String id, String data, String turno, String materia, int duracaoMin, List<Topico> topicos, boolean concluido, long concluidoEm)
+    {
+        this (id, data, turno, materia, duracaoMin, "", topicos, concluido, concluidoEm);
+    }
+    public Bloco (String id, String data, String turno, String materia, int duracaoMin, String descricao, List<Topico> topicos, boolean concluido, long concluidoEm)
     {
         this.id = id;
         this.data = data;
         this.turno = turno;
         this.materia = materia;
         this.duracaoMin = duracaoMin;
+        this.descricao = descricao;
         this.topicos = topicos==null ? null:new ArrayList<Topico> (topicos);
         this.concluido = concluido;
         this.concluidoEm = concluidoEm;
@@ -44,6 +50,7 @@ public class Bloco implements Serializable
     public String getTurno() { return this.turno; }
     public String getMateria() { return this.materia; }
     public int getDuracaoMin() { return this.duracaoMin; }
+    public String getDescricao() { return this.descricao == null ? "" : this.descricao; }
     public List<Topico> getTopicos() { return this.topicos==null ? null : Collections.unmodifiableList (this.topicos); }
     public boolean isConcluido() { return this.concluido; }
     public long getConcluidoEm() { return this.concluidoEm; }

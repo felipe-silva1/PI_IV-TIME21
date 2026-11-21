@@ -61,4 +61,31 @@ class TarefaServiceTest
         assertEquals("65f1c4d9e1b2c3d4e5f6071a", pedido.getValue().getTarefaId());
         assertTrue(pedido.getValue().isConcluido());
     }
+
+    @Test
+    void atualizarTarefaEnviaDataTurnoMateriaDuracaoEDescricao()
+    {
+        ClienteSocket clienteSocket = mock(ClienteSocket.class);
+        Bloco tarefa = new Bloco(
+                "65f1c4d9e1b2c3d4e5f6071a",
+                "2026-11-19", "TARDE", "Matematica", 75,
+                "Resolver exercicios de funcoes", List.of(), true, 1784476800000L);
+        when(clienteSocket.enviar(any(PedidoParaAtualizarTarefa.class)))
+                .thenReturn(new RespostaDeTarefa(tarefa));
+        TarefaService servico = new TarefaService(clienteSocket);
+
+        Bloco atualizada = servico.atualizar(
+                "65f1c2a4e1b2c3d4e5f60718",
+                "65f1c4d9e1b2c3d4e5f6071a",
+                "2026-11-19", "TARDE", "Matematica", 75,
+                "Resolver exercicios de funcoes", true);
+
+        assertEquals("Resolver exercicios de funcoes", atualizada.getDescricao());
+        var pedido = forClass(PedidoParaAtualizarTarefa.class);
+        verify(clienteSocket).enviar(pedido.capture());
+        assertTrue(pedido.getValue().isAtualizacaoCompleta());
+        assertEquals("2026-11-19", pedido.getValue().getData());
+        assertEquals("TARDE", pedido.getValue().getTurno());
+        assertEquals("Resolver exercicios de funcoes", pedido.getValue().getDescricao());
+    }
 }

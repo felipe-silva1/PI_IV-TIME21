@@ -4,6 +4,7 @@ package com.guiavest.backend_api.controller;
 import br.edu.time21.comunicacao.Bloco;
 import com.guiavest.backend_api.model.SessionUser;
 import com.guiavest.backend_api.model.TarefaStatusRequest;
+import com.guiavest.backend_api.model.TarefaUpdateRequest;
 import com.guiavest.backend_api.service.AuthService;
 import com.guiavest.backend_api.service.TarefaService;
 import com.guiavest.backend_api.service.TarefaService.TarefaException;
@@ -57,6 +58,23 @@ public class TarefaController
         return ResponseEntity.ok(
                 this.tarefaService.atualizarStatus(
                         usuario.usuarioId(), tarefaId, concluido));
+    }
+
+    @PatchMapping("/{tarefaId}")
+    public ResponseEntity<Bloco> atualizar(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @PathVariable("tarefaId") String tarefaId,
+            @RequestBody(required = false) TarefaUpdateRequest request)
+    {
+        SessionUser usuario = autenticar(authorization);
+        if (request == null)
+            throw new TarefaException(400, "Nenhum dado de tarefa informado.");
+
+        return ResponseEntity.ok(
+                this.tarefaService.atualizar(
+                        usuario.usuarioId(), tarefaId,
+                        request.data(), request.turno(), request.materia(),
+                        request.duracaoMin(), request.descricao(), request.concluido()));
     }
 
     @ExceptionHandler(TarefaException.class)
