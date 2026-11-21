@@ -234,6 +234,7 @@ async function carregarRotinaSalva() {
     }
 }
 
+// Salva a rotina e aguarda a geração do primeiro mês antes de abrir o painel.
 formRotina.addEventListener('submit', async e => {
     e.preventDefault();
     limparMensagens();

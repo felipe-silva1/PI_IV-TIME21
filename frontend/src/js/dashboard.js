@@ -44,6 +44,64 @@
         return Number.isInteger(numero) ? `${numero}h` : `${numero.toFixed(1)}h`;
     }
 
+    // Compartilha a gravação do status entre o checklist de hoje e a prévia semanal.
+    function configurarCheckboxTarefa(tarefa, checkbox, atualizarVisual, erroAoSalvar) {
+        let concluidaSalva = tarefa.concluido === true;
+        checkbox.checked = concluidaSalva;
+
+        checkbox.addEventListener('change', async () => {
+            const concluido = checkbox.checked;
+            checkbox.disabled = true;
+            erroAoSalvar.textContent = '';
+            atualizarVisual();
+
+            try {
+                const tarefaId = encodeURIComponent(tarefa.id);
+                const resposta = await requisicaoAutenticada(
+                    `${API_TAREFAS}/${tarefaId}/status`,
+                    {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ concluido })
+                    }
+                );
+
+                if (resposta.status === 401) {
+                    limparSessao();
+                    location.replace('../login.html');
+                    return;
+                }
+
+                if (!resposta.ok) {
+                    const mensagem = await mensagemDeErro(resposta).catch(
+                        () => 'Não foi possível salvar o estado da tarefa.'
+                    );
+                    throw new Error(mensagem);
+                }
+
+                const tarefaAtualizada = await resposta.json();
+                concluidaSalva = tarefaAtualizada.concluido === true;
+                checkbox.checked = concluidaSalva;
+                atualizarVisual();
+            } catch (erro) {
+                // Restaura o último estado confirmado pela API quando a atualização falha.
+                checkbox.checked = concluidaSalva;
+                atualizarVisual();
+                erroAoSalvar.textContent = erro instanceof TypeError
+                    ? 'Não foi possível confirmar a alteração. Tente novamente.'
+                    : erro.message;
+                return;
+            } finally {
+                checkbox.disabled = false;
+            }
+
+            carregarTarefasDeHoje();
+            carregarResumoDaSemana();
+            carregarProgresso();
+        });
+    }
+
+    // Monta um item do checklist de hoje com matéria, turno, status e tópicos.
     function criarItemTarefa(tarefa) {
         const item = document.createElement('li');
         item.className = 'painel-tarefa';
@@ -54,8 +112,8 @@
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'painel-tarefa-checkbox';
-        let concluidaSalva = tarefa.concluido === true;
-        checkbox.checked = concluidaSalva;
+        configurarCheckboxTarefa(tarefa, checkbox, atualizarVIsual, erroAoSalvar);
+        atualizarVisual();
 
         const detalhes = document.createElement('span');
         detalhes.className = 'painel-tarefa-detalhes';
@@ -184,30 +242,40 @@
         }
     }
 
+    // Monta o cartão clicável da semana usando um checkbox que ocupa toda a área.
     function criarBlocoDaSemana(bloco, hojeISO) {
-        let estado = 'pendente';
+        const item = document.createElement('li');
+        const rotulo = document.createElement('label');
 
-        if (bloco.concluido === true) {
-            estado = 'concluido';
-        } else if (bloco.data < hojeISO) {
-            estado = 'atrasado';
-        }
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
 
+        const detalhes = document.createElement('span');
+        detalhes.className = 'painel-semana-detalhes';
+
+        const erroAoSalvar = document.createElement('small');
+        erroAoSalvar.setAttribute('role', 'status');
+
+        const turno = TURNOS[bloco.turno] ?? bloco.turno;
+        // Ao desmarcar um bloco, a data determina se ele volta a atrasado ou pendente.
+        const estadoEmAberto = bloco.data < hojeISO ? 'atrasado' : 'pendente';
         const rotulos = {
             concluido: 'Concluído',
             atrasado: 'Atrasado',
             pendente: 'Pendente'
         };
 
-        const item = document.createElement('li');
-        item.className = `painel-semana-bloco ${estado}`;
-        item.append(bloco.materia);
+        function atualizarVisual() {
+            const estado = checkbox.checked ? 'concluido' : estadoEmAberto;
+            item.className = `painel-semana-bloco ${estado}`;
+            detalhes.textContent = ` — ${turno}, ${rotulos[estado]}`;
+        }
 
-        const detalhes = document.createElement('span');
-        detalhes.className = 'painel-semana-detalhes';
-        detalhes.textContent = ` — ${TURNOS[bloco.turno] ?? bloco.turno}, ${rotulos[estado]}`;
-        item.append(detalhes);
+        configurarCheckboxTarefa(bloco, checkbox, atualizarVisual, erroAoSalvar);
+        atualizarVisual();
 
+        rotulo.append(checkbox, ` ${bloco.materia}`, detalhes);
+        item.append(rotulo, erroAoSalvar);
         return item;
     }
 

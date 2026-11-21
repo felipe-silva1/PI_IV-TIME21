@@ -128,6 +128,7 @@
 }
 
 .painel-semana-bloco {
+    position: relative;
     display: grid;
     align-content: center;
     min-block-size: calc(2.5em + var(--espaco-1) + var(--espaco-1));
@@ -140,6 +141,31 @@
     font-size: 0.75rem;
     line-height: 1.25;
     overflow-wrap: anywhere;
+}
+
+.painel-semana-bloco > label > input[type="checkbox"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.painel-semana-bloco > label > input:disabled {
+    cursor: wait;
+}
+
+.painel-semana-bloco:has(> label > input:focus-visible) {
+    outline: 2px solid var(--azul-primario);
+    outline-offset: -2px;
+}
+
+.painel-semana-instrucao {
+    margin-bottom: var(--espaco-2);
+    color: var(--texto-suave);
+    font-size: 0.75rem;
 }
 
 .painel-semana-legenda {

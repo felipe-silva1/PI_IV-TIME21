@@ -50,6 +50,7 @@ public class CronogramaController
                         .body(Map.of("message", "Cronograma ainda não gerado para esta semana.")));
     }
 
+    /** Gera o primeiro mês do usuário autenticado e confirma a conclusão com HTTP 204. */
     @PostMapping("/gerar-primeiro-mes")
     public ResponseEntity<Void> gerarPrimeiroMes(
                 @RequestHeader(value = "Authorization", required = false)
