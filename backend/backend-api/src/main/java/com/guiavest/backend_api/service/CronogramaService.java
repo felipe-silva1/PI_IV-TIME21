@@ -56,6 +56,10 @@ public class CronogramaService
         throw new CronogramaException(503, "Não foi possível consultar o cronograma no momento.");
     }
 
+    /**
+     * Gera as semanas faltantes entre a semana atual e as três seguintes.
+     * Preserva os blocos já salvos, inclusive em uma nova tentativa após falha parcial.
+     */
     public void gerarPrimeiroMes(String usuarioId)
     {
         LocalDate segunda = resolverSegundaFeira(null);
