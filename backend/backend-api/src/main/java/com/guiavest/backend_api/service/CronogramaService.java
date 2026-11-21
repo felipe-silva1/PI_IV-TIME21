@@ -56,6 +56,20 @@ public class CronogramaService
         throw new CronogramaException(503, "Não foi possível consultar o cronograma no momento.");
     }
 
+    public void gerarPrimeiroMes(String usuarioId)
+    {
+        LocalDate segunda = resolverSegundaFeira(null);
+
+        for(int indice = 0; indice < 4; indice++) {
+            String semana = segunda.plusWeeks(indice).toString();
+
+            if(buscarDaSemana(usuarioId, semana).isEmpty())
+            {
+                gerarESalvar(usuarioId, semana);
+            }
+        }
+    }
+
     public Cronograma gerarESalvar(String usuarioId, String semanaTexto)
     {
         LocalDate segunda = resolverSegundaFeira(semanaTexto);

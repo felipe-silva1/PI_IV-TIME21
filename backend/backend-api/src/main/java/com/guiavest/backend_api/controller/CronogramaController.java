@@ -50,6 +50,15 @@ public class CronogramaController
                         .body(Map.of("message", "Cronograma ainda não gerado para esta semana.")));
     }
 
+    @PostMapping("/gerar-primeiro-mes")
+    public ResponseEntity<Void> gerarPrimeiroMes(
+                @RequestHeader(value = "Authorization", required = false)
+                String authorization) {
+        SessionUser usuario = autenticar(authorization);
+        cronogramaService.gerarPrimeiroMes(usuario.usuarioId());
+        return ResponseEntity.noContent().build();
+}
+
     @PostMapping("/gerar")
     public ResponseEntity<Cronograma> gerarCronograma(
             @RequestHeader(value = "Authorization", required = false) String authorization,

@@ -276,6 +276,18 @@ formRotina.addEventListener('submit', async e => {
             throw new Error(await mensagemDeErro(response));
         }
 
+        const cronograma = await requisicaoAutenticada(
+            'http://localhost:8080/api/cronogramas/gerar-primeiro-mes',
+            { method: 'POST' }
+        );
+
+        if (!cronograma.ok) {
+            const detalhe = await mensagemDeErro(cronograma);
+            throw new Error(`A rotina foi salva, mas a geração do cronograma falhou. ${detalhe}`);
+
+        }
+        location.href = 'dashboard.html';
+
         sucessoEl.textContent = 'Rotina salva com sucesso!';
     } catch (falha) {
         erroEl.textContent = falha.message || 'Não foi possível salvar a rotina na API.';
