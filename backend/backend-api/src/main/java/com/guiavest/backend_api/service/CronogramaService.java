@@ -57,8 +57,8 @@ public class CronogramaService
     }
 
     /**
-     * Gera as semanas faltantes entre a semana atual e as três seguintes.
-     * Preserva os blocos já salvos, inclusive em uma nova tentativa após falha parcial.
+     * Gera os blocos do período inicial de 30 dias, incluindo o dia atual,
+     * e preserva os cronogramas já gravados.
      */
     public void gerarPrimeiroMes(String usuarioId)
     {
@@ -72,17 +72,31 @@ public class CronogramaService
         {
             String semana = segunda.toString();
 
-            if (buscarDaSemana(usuarioId, semana).isEmpty())
-            {
-                gerarESalvar(usuarioId, semana);
-            }
+            if (buscarDaSemana(usuarioId, semana).isPresent())
+                continue;
+
+            List<BlocoDeEstudo> blocosDoPeriodo = gerarBlocosDaSemana(usuarioId, segunda)
+                    .stream()
+                    .filter(bloco -> {
+                        LocalDate data = LocalDate.parse(bloco.data());
+                        return !data.isBefore(inicio) && !data.isAfter(fim);
+                    })
+                    .toList();
+
+            if (!blocosDoPeriodo.isEmpty())
+                salvarSemana(usuarioId, segunda, blocosDoPeriodo);
         }
     }
 
     public Cronograma gerarESalvar(String usuarioId, String semanaTexto)
     {
         LocalDate segunda = resolverSegundaFeira(semanaTexto);
+        List<BlocoDeEstudo> blocosGerados = gerarBlocosDaSemana(usuarioId, segunda);
+        return salvarSemana(usuarioId, segunda, blocosGerados);
+    }
 
+    private List<BlocoDeEstudo> gerarBlocosDaSemana(String usuarioId, LocalDate segunda)
+    {
         Rotina rotina;
         try
         {
@@ -100,6 +114,12 @@ public class CronogramaService
             throw new CronogramaException(
                     400, "Sua rotina não possui turnos ou matérias suficientes para gerar o cronograma.");
 
+        return blocosGerados;
+    }
+
+    private Cronograma salvarSemana(
+            String usuarioId, LocalDate segunda, List<BlocoDeEstudo> blocosGerados)
+    {
         ArrayList<Bloco> blocosProtocolo = new ArrayList<>(blocosGerados.size());
         for (BlocoDeEstudo b : blocosGerados)
         {
