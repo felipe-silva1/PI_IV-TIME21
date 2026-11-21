@@ -1,8 +1,10 @@
+//Max Thomazini Barbosa 25003934
 package br.edu.time21.comunicacao;
 
 // aviso que o servidor manda a todos os conectados antes de se desativar.
 // e uma Resposta por causa do sentido (servidor -> backend), mesmo nao
 // sendo resposta de nenhum pedido.
+// Aviso enviado pelo servidor antes de encerrar a conexão.
 public class ComunicadoDeDesligamento extends Resposta
 {
     private static final long serialVersionUID = 1L;

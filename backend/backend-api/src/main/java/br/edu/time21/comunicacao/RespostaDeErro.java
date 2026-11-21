@@ -1,8 +1,10 @@
+//Max Thomazini Barbosa 25003934
 package br.edu.time21.comunicacao;
 
 // resposta padrao para qualquer pedido que o servidor nao conseguiu atender.
 // o backend decide pelo codigo o que devolver ao frontend; a mensagem e so
 // para log e diagnostico, nunca para ser mostrada crua ao usuario final.
+// Devolve um código de erro padronizado e uma descrição técnica da falha.
 public class RespostaDeErro extends Resposta
 {
     private static final long serialVersionUID = 1L;

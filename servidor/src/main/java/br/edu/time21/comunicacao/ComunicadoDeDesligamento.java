@@ -1,3 +1,4 @@
+//Max Thomazini Barbosa 25003934
 package br.edu.time21.comunicacao;
 
 // aviso que o servidor manda a todos os conectados antes de se desativar.

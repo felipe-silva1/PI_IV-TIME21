@@ -1,9 +1,12 @@
+//Max Thomazini Barbosa 25003934
 package com.guiavest.backend_api.model;
 
 public class HealthResponse {
+    // Indica se a aplicação está ativa e apresenta uma mensagem operacional.
     private String status;
     private String mensagem;
 
+    // Guarda os dados que serão enviados ao frontend no formato JSON.
     public HealthResponse(String status, String mensagem) {
         this.status = status;
         this.mensagem = mensagem;

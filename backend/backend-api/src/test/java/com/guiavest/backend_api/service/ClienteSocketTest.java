@@ -1,3 +1,4 @@
+//Max Thomazini Barbosa 25003934
 package com.guiavest.backend_api.service;
 
 import br.edu.time21.comunicacao.PedidoDeStatus;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 class ClienteSocketTest
 {
+    // Cria um servidor local para verificar o envio e retorno de objetos via socket.
     @Test
     void enviaPedidoEDevolveRespostaDoServidor() throws Exception
     {

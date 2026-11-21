@@ -1,3 +1,4 @@
+//Max Thomazini Barbosa 25003934
 package com.guiavest.backend_api.service;
 
 import br.edu.time21.comunicacao.Bloco;
@@ -11,8 +12,10 @@ import java.util.List;
 @Component
 public class CalculadoraDeProgressoSemanal
 {
+    // Agrega a lista de blocos em tarefas concluídas, horas planejadas e percentuais.
     public ProgressoSemanal calcular(List<Bloco> blocos)
     {
+        // Uma lista nula é tratada como ausência de tarefas.
         if (blocos == null)
             blocos = List.of();
 
@@ -23,6 +26,7 @@ public class CalculadoraDeProgressoSemanal
 
         for (Bloco bloco : blocos)
         {
+            // Blocos nulos não devem interferir no total ou nas somas.
             if (bloco == null)
             {
                 totalTarefas--;

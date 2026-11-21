@@ -1,3 +1,4 @@
+//Max Thomazini Barbosa 25003934
 package br.edu.time21.comunicacao;
 
 import java.io.*;
@@ -8,6 +9,7 @@ import java.io.*;
 // serialVersionUID NAO e herdado: cada classe serializavel precisa declarar
 // o seu, senao a JVM calcula um valor a partir da assinatura da classe e
 // qualquer alteracao de campo quebra a compatibilidade entre os dois lados.
+// Base comum de todos os dados enviados pela comunicação socket.
 public abstract class Comunicado implements Serializable
 {
     private static final long serialVersionUID = 1L;

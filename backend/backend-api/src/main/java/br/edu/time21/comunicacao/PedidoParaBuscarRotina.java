@@ -1,8 +1,10 @@
+//Max Thomazini Barbosa 25003934
 package br.edu.time21.comunicacao;
 
 // busca a rotina de um usuario pelo id. respondido com RespostaDeRotina
 // (com rotina null se o usuario ainda nao cadastrou a dele) ou
 // RespostaDeErro (PEDIDO_INVALIDO, BANCO_INDISPONIVEL ou ERRO_INTERNO)
+// Solicita a rotina cadastrada para o identificador do usuário.
 public class PedidoParaBuscarRotina extends Pedido
 {
     private static final long serialVersionUID = 1L;

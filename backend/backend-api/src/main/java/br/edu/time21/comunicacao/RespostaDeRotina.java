@@ -1,8 +1,10 @@
+//Max Thomazini Barbosa 25003934
 package br.edu.time21.comunicacao;
 
 // resposta de PedidoParaSalvarRotina e de PedidoParaBuscarRotina.
 // rotina e null quando a busca nao encontrou nada: usuario sem rotina
 // cadastrada e um caso normal (primeiro acesso), nao um erro.
+// Devolve a rotina encontrada ou null quando o usuário ainda não possui rotina.
 public class RespostaDeRotina extends Resposta
 {
     private static final long serialVersionUID = 1L;

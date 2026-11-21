@@ -1,7 +1,9 @@
+//Max Thomazini Barbosa 25003934
 package com.guiavest.backend_api.model;
 
 public class ProgressoSemanal
 {
+    // Quantidade absoluta e percentuais utilizados pelo painel de progresso.
     private final int tarefasConcluidas;
     private final int totalTarefas;
     private final double percentualTarefasConcluidas;
@@ -25,6 +27,7 @@ public class ProgressoSemanal
         this.percentualHorasCumpridas = percentualHorasCumpridas;
     }
 
+    // Métodos de leitura: cada getter expõe uma informação calculada ao JSON da API.
     public int getTarefasConcluidas() { return tarefasConcluidas; }
     public int getTotalTarefas() { return totalTarefas; }
     public int getTarefasTotais() { return totalTarefas; }

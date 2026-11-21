@@ -1,3 +1,4 @@
+//Max Thomazini Barbosa 25003934
 package com.guiavest.backend_api.service;
 
 import br.edu.time21.comunicacao.Bloco;
@@ -10,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CalculadoraDeProgressoSemanalTest
 {
+    // Valida o cálculo misto de tarefas concluídas e horas planejadas/cumpridas.
     @Test
     void calculaPercentualDeTarefasEHorasCumpridas()
     {

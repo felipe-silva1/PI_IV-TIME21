@@ -1,3 +1,4 @@
+//Max Thomazini Barbosa 25003934
 package com.guiavest.backend_api.service;
 
 import br.edu.time21.comunicacao.Comunicado;
@@ -18,6 +19,7 @@ import java.net.Socket;
 @Service
 public class ClienteSocket
 {
+    // Configurações de conexão recebidas do application.properties.
     private static final Logger LOGGER = LoggerFactory.getLogger(ClienteSocket.class);
 
     private final String endereco;
@@ -29,6 +31,7 @@ public class ClienteSocket
             @Value("${servidor.porta:3000}") int porta,
             @Value("${servidor.timeout-ms:5000}") int timeoutEmMilissegundos)
     {
+        // Impede a criação do cliente com endereço, porta ou timeout inválidos.
         if (endereco == null || endereco.isBlank())
             throw new IllegalArgumentException("Endereco do servidor ausente");
         if (porta < 1 || porta > 65535)
@@ -43,11 +46,13 @@ public class ClienteSocket
 
     public Resposta enviar(Pedido pedido)
     {
+        // Um pedido nulo não pode ser transmitido ao servidor.
         if (pedido == null)
             throw new IllegalArgumentException("Pedido ausente");
 
         try (Socket conexao = new Socket())
         {
+            // Abre a conexão TCP e limita o tempo de espera das operações.
             conexao.connect(new java.net.InetSocketAddress(this.endereco, this.porta),
                             this.timeoutEmMilissegundos);
             conexao.setSoTimeout(this.timeoutEmMilissegundos);
@@ -57,9 +62,11 @@ public class ClienteSocket
             {
                 transmissor.flush();
 
+                // Cria os fluxos Java usados para enviar e receber objetos serializados.
                 try (ObjectInputStream receptor =
                              new ObjectInputStream(conexao.getInputStream()))
                 {
+                    // Envia o pedido e aguarda o primeiro comunicado da resposta.
                     transmissor.writeObject(pedido);
                     transmissor.flush();
 

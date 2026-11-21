@@ -1,3 +1,4 @@
+//Max Thomazini Barbosa 25003934
 package com.guiavest.backend_api.service;
 
 import br.edu.time21.comunicacao.Cronograma;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProgressoService
 {
+    // Dependências responsáveis por localizar o cronograma e calcular os indicadores.
     private final CronogramaService cronogramaService;
     private final CalculadoraDeProgressoSemanal calculadora;
 
@@ -21,12 +23,14 @@ public class ProgressoService
 
     public ProgressoSemanal calcularDaSemana(String usuarioId, String semana)
     {
+        // Não é possível calcular progresso sem um usuário autenticado.
         if (usuarioId == null || usuarioId.isBlank())
             throw new ProgressoException(401, "Sessão inválida ou expirada.");
 
         Cronograma cronograma;
         try
         {
+            // Busca o cronograma armazenado para o usuário e a semana informada.
             cronograma = cronogramaService.buscarDaSemana(usuarioId, semana)
                     .orElse(null);
         }

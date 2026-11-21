@@ -1,3 +1,4 @@
+//Max Thomazini Barbosa 25003934
 package br.edu.time21.comunicacao;
 
 // encerra a conexao; o servidor nao responde, so fecha o socket
