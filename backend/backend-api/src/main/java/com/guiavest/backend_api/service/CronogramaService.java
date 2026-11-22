@@ -1,7 +1,9 @@
 package com.guiavest.backend_api.service;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAdjusters;
@@ -57,31 +59,65 @@ public class CronogramaService
     }
 
     /**
-     * Gera as semanas faltantes entre a semana atual e as três seguintes.
-     * Preserva os blocos já salvos, inclusive em uma nova tentativa após falha parcial.
+     * Gera os blocos dos 30 dias a partir da criação da rotina
+     * e preserva os cronogramas já gravados.
      */
     public void gerarPrimeiroMes(String usuarioId)
     {
-        LocalDate segunda = resolverSegundaFeira(null);
+        Rotina rotina = buscarRotina(usuarioId);
+        long criadoEm = rotina.getCriadoEm();
+        LocalDate inicio = criadoEm > 0
+                ? Instant.ofEpochMilli(criadoEm).atZone(ZoneId.systemDefault()).toLocalDate()
+                : LocalDate.now();
 
-        for(int indice = 0; indice < 4; indice++) {
-            String semana = segunda.plusWeeks(indice).toString();
+        gerarPrimeiroMes(rotina, inicio);
+    }
 
-            if(buscarDaSemana(usuarioId, semana).isEmpty())
-            {
-                gerarESalvar(usuarioId, semana);
-            }
+    void gerarPrimeiroMes(String usuarioId, LocalDate inicio)
+    {
+        gerarPrimeiroMes(buscarRotina(usuarioId), inicio);
+    }
+
+    private void gerarPrimeiroMes(Rotina rotina, LocalDate inicio)
+    {
+        String usuarioId = rotina.getUsuarioId();
+        LocalDate fim = inicio.plusDays(29);
+        LocalDate primeiraSegunda = inicio.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        for (LocalDate segunda = primeiraSegunda;
+                !segunda.isAfter(fim);
+                segunda = segunda.plusWeeks(1))
+        {
+            String semana = segunda.toString();
+
+            if (buscarDaSemana(usuarioId, semana).isPresent())
+                continue;
+
+            List<BlocoDeEstudo> blocosDoPeriodo = gerarBlocosDaSemana(rotina, segunda)
+                    .stream()
+                    .filter(bloco -> {
+                        LocalDate data = LocalDate.parse(bloco.data());
+                        return !data.isBefore(inicio) && !data.isAfter(fim);
+                    })
+                    .toList();
+
+            if (!blocosDoPeriodo.isEmpty())
+                salvarSemana(usuarioId, segunda, blocosDoPeriodo);
         }
     }
 
     public Cronograma gerarESalvar(String usuarioId, String semanaTexto)
     {
         LocalDate segunda = resolverSegundaFeira(semanaTexto);
+        List<BlocoDeEstudo> blocosGerados = gerarBlocosDaSemana(buscarRotina(usuarioId), segunda);
+        return salvarSemana(usuarioId, segunda, blocosGerados);
+    }
 
-        Rotina rotina;
+    private Rotina buscarRotina(String usuarioId)
+    {
         try
         {
-            rotina = this.rotinaService.buscarPorUsuario(usuarioId)
+            return this.rotinaService.buscarPorUsuario(usuarioId)
                     .orElseThrow(() -> new CronogramaException(
                             400, "Cadastre sua rotina antes de gerar o cronograma."));
         }
@@ -89,12 +125,21 @@ public class CronogramaService
         {
             throw new CronogramaException(erro.getStatus(), erro.getMessage());
         }
+    }
 
+    private List<BlocoDeEstudo> gerarBlocosDaSemana(Rotina rotina, LocalDate segunda)
+    {
         List<BlocoDeEstudo> blocosGerados = this.geradorDeCronograma.gerar(rotina, segunda);
         if (blocosGerados.isEmpty())
             throw new CronogramaException(
                     400, "Sua rotina não possui turnos ou matérias suficientes para gerar o cronograma.");
 
+        return blocosGerados;
+    }
+
+    private Cronograma salvarSemana(
+            String usuarioId, LocalDate segunda, List<BlocoDeEstudo> blocosGerados)
+    {
         ArrayList<Bloco> blocosProtocolo = new ArrayList<>(blocosGerados.size());
         for (BlocoDeEstudo b : blocosGerados)
         {

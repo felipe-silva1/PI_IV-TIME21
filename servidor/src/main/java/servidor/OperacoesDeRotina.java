@@ -11,6 +11,8 @@ import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.ReturnDocument;
 
 import java.util.*;
 
@@ -66,18 +68,23 @@ public class OperacoesDeRotina
             ObjectId usuarioId = new ObjectId (rotina.getUsuarioId());
             Date     agora     = new Date ();
 
-            // upsert: insere se o usuario ainda nao tem perfil; se ja tem,
-            // substitui o documento inteiro (o _id e mantido)
-            this.colecao.replaceOne (Filters.eq ("usuarioId", usuarioId),
-                                     OperacoesDeRotina.paraDocumento (rotina, usuarioId, agora),
-                                     new ReplaceOptions().upsert (true));
+            Document campos = new Document();
+            OperacoesDeRotina.paraDocumento(rotina, usuarioId, agora)
+                    .forEach((nome, valor) -> campos.append(nome, new Document("$literal", valor)));
 
-            return new RespostaDeRotina (
-                new Rotina (usuarioId.toHexString(),
-                            rotina.getVestibular(),
-                            rotina.getDisponibilidade(),
-                            rotina.getMateriasPrioritarias(),
-                            agora.getTime()));
+            campos.append("criadoEm", new Document("$ifNull", List.of(
+                "$criadoEm",
+                new Document("$ifNull", List.of("$atualizadoEm", agora))
+            )));
+
+            Document salvo = this.colecao.findOneAndUpdate(
+                Filters.eq("usuarioId", usuarioId),
+                List.of(new Document("$set", campos)),
+                new FindOneAndUpdateOptions()
+                        .upsert(true)
+                        .returnDocument(ReturnDocument.AFTER)
+            );
+            return new RespostaDeRotina(OperacoesDeRotina.deDocumento(salvo));
         }
         catch (Exception erro)
         {
@@ -187,12 +194,14 @@ public class OperacoesDeRotina
                                                  turno.getString ("turno")));
 
         Date atualizadoEm = documento.getDate ("atualizadoEm");
+        Date criadoEm = documento.getDate ("criadoEm");
 
         return new Rotina (documento.getObjectId ("usuarioId").toHexString(),
                            documento.getString ("vestibular"),
                            disponibilidade,
                            documento.getList ("materiasPrioritarias", String.class),
-                           atualizadoEm==null ? 0L : atualizadoEm.getTime());
+                           atualizadoEm==null ? 0L : atualizadoEm.getTime(),
+                           criadoEm==null ? 0L : criadoEm.getTime());
     }
 
     private static RespostaDeErro erroDeBanco (String operacao, Exception erro)

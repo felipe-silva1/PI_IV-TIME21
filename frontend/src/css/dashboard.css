@@ -29,6 +29,13 @@
     font-weight: 700;
 }
 
+#progresso-periodo {
+    color: var(--texto-suave);
+    font-size: 0.8rem;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
 .painel-progresso-barra {
     width: 100%;
     height: 0.75rem;
@@ -101,7 +108,7 @@
     text-align: center;
 }
 
-.painel-semana-dia time[aria-currente="date"] {
+.painel-semana-dia time[aria-current="date"] {
     color: var(--azul-primario);
 }
 
@@ -176,6 +183,21 @@
     color: var(--texto-suave);
     font-size: 0.75rem;
     list-style: none;
+}
+
+.painel-proximo-estudo {
+    display: grid;
+    gap: var(--espaco-1);
+    margin-bottom: var(--espaco-3);
+    padding: var(--espaco-2) var(--espaco-3);
+    background: var(--subfundo);
+    border-radius: var(--raio);
+    color: var(--texto-suave);
+    font-size: 0.8rem;
+}
+
+.painel-proximo-estudo strong {
+    color: var(--texto);
 }
 
 .painel-semana-marca {
