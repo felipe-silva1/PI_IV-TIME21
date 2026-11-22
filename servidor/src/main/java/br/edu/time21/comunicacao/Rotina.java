@@ -20,6 +20,7 @@ public class Rotina implements Serializable
     private ArrayList<TurnoLivre> disponibilidade;
     private ArrayList<String>     materiasPrioritarias;  // da maior para a menor prioridade
     private long                  atualizadoEm;          // milissegundos desde 01/01/1970 (UTC); 0 se ainda nao gravada
+    private long                  criadoEm;              // instante da primeira gravação; 0 se desconhecido
 
     // usado pelo backend para montar o PedidoParaSalvarRotina; quem preenche
     // atualizadoEm e o servidor, no momento em que grava
@@ -37,11 +38,22 @@ public class Rotina implements Serializable
                    List<String>     materiasPrioritarias,
                    long             atualizadoEm)
     {
+        this (usuarioId, vestibular, disponibilidade, materiasPrioritarias, atualizadoEm, 0L);
+    }
+
+    public Rotina (String           usuarioId,
+                   String           vestibular,
+                   List<TurnoLivre> disponibilidade,
+                   List<String>     materiasPrioritarias,
+                   long             atualizadoEm,
+                   long             criadoEm)
+    {
         this.usuarioId            = usuarioId;
         this.vestibular           = vestibular;
         this.disponibilidade      = Rotina.copia (disponibilidade);
         this.materiasPrioritarias = Rotina.copia (materiasPrioritarias);
         this.atualizadoEm         = atualizadoEm;
+        this.criadoEm             = criadoEm;
     }
 
     private static <T> ArrayList<T> copia (List<T> lista)
@@ -59,6 +71,7 @@ public class Rotina implements Serializable
     public List<TurnoLivre> getDisponibilidade      () { return Rotina.somenteLeitura (this.disponibilidade);      }
     public List<String>     getMateriasPrioritarias () { return Rotina.somenteLeitura (this.materiasPrioritarias); }
     public long             getAtualizadoEm         () { return this.atualizadoEm; }
+    public long             getCriadoEm             () { return this.criadoEm; }
 
     public String toString ()
     {

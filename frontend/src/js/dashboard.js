@@ -112,8 +112,6 @@
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'painel-tarefa-checkbox';
-        configurarCheckboxTarefa(tarefa, checkbox, atualizarVIsual, erroAoSalvar);
-        atualizarVisual();
 
         const detalhes = document.createElement('span');
         detalhes.className = 'painel-tarefa-detalhes';
@@ -133,55 +131,7 @@
         const erroAoSalvar = document.createElement('small');
         erroAoSalvar.setAttribute('role', 'status');
 
-        checkbox.addEventListener('change', async () => {
-            const concluido = checkbox.checked;
-            checkbox.disabled = true;
-            erroAoSalvar.textContent = '';
-            atualizarVisual();
-
-            try {
-                const tarefaId = encodeURIComponent(tarefa.id);
-                const resposta = await requisicaoAutenticada(
-                    `${API_TAREFAS}/${tarefaId}/status`,
-                    {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ concluido })
-                    }
-                );
-
-                if (resposta.status === 401) {
-                    limparSessao();
-                    location.replace('../login.html');
-                    return;
-                }
-
-                if (!resposta.ok) {
-                    const mensagem = await mensagemDeErro(resposta).catch(
-                        () => 'Não foi possível salvar o estado da tarefa.'
-                    );
-                    throw new Error(mensagem);
-                }
-
-                const tarefaAtualizada = await resposta.json();
-                concluidaSalva = tarefaAtualizada.concluido === true;
-                checkbox.checked = concluidaSalva;
-                atualizarVisual();
-            } catch (erro) {
-                checkbox.checked = concluidaSalva;
-                atualizarVisual();
-                erroAoSalvar.textContent = erro instanceof TypeError
-                    ? 'Não foi possível confirmar a alteração. Tente novamente.'
-                    : erro.message;
-                return;
-            } finally {
-                checkbox.disabled = false;
-            }
-
-            carregarResumoDaSemana();
-            carregarProgresso();
-        });
-
+        configurarCheckboxTarefa(tarefa, checkbox, atualizarVisual, erroAoSalvar);
         atualizarVisual();
 
         detalhes.append(materia, estado);

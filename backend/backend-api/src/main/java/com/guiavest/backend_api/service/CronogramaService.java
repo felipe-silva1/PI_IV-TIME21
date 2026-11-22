@@ -1,7 +1,9 @@
 package com.guiavest.backend_api.service;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAdjusters;
@@ -57,16 +59,28 @@ public class CronogramaService
     }
 
     /**
-     * Gera os blocos do período inicial de 30 dias, incluindo o dia atual,
+     * Gera os blocos dos 30 dias a partir da criação da rotina
      * e preserva os cronogramas já gravados.
      */
     public void gerarPrimeiroMes(String usuarioId)
     {
-        gerarPrimeiroMes(usuarioId, LocalDate.now());
+        Rotina rotina = buscarRotina(usuarioId);
+        long criadoEm = rotina.getCriadoEm();
+        LocalDate inicio = criadoEm > 0
+                ? Instant.ofEpochMilli(criadoEm).atZone(ZoneId.systemDefault()).toLocalDate()
+                : LocalDate.now();
+
+        gerarPrimeiroMes(rotina, inicio);
     }
+
     void gerarPrimeiroMes(String usuarioId, LocalDate inicio)
     {
-       
+        gerarPrimeiroMes(buscarRotina(usuarioId), inicio);
+    }
+
+    private void gerarPrimeiroMes(Rotina rotina, LocalDate inicio)
+    {
+        String usuarioId = rotina.getUsuarioId();
         LocalDate fim = inicio.plusDays(29);
         LocalDate primeiraSegunda = inicio.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
@@ -79,7 +93,7 @@ public class CronogramaService
             if (buscarDaSemana(usuarioId, semana).isPresent())
                 continue;
 
-            List<BlocoDeEstudo> blocosDoPeriodo = gerarBlocosDaSemana(usuarioId, segunda)
+            List<BlocoDeEstudo> blocosDoPeriodo = gerarBlocosDaSemana(rotina, segunda)
                     .stream()
                     .filter(bloco -> {
                         LocalDate data = LocalDate.parse(bloco.data());
@@ -95,16 +109,15 @@ public class CronogramaService
     public Cronograma gerarESalvar(String usuarioId, String semanaTexto)
     {
         LocalDate segunda = resolverSegundaFeira(semanaTexto);
-        List<BlocoDeEstudo> blocosGerados = gerarBlocosDaSemana(usuarioId, segunda);
+        List<BlocoDeEstudo> blocosGerados = gerarBlocosDaSemana(buscarRotina(usuarioId), segunda);
         return salvarSemana(usuarioId, segunda, blocosGerados);
     }
 
-    private List<BlocoDeEstudo> gerarBlocosDaSemana(String usuarioId, LocalDate segunda)
+    private Rotina buscarRotina(String usuarioId)
     {
-        Rotina rotina;
         try
         {
-            rotina = this.rotinaService.buscarPorUsuario(usuarioId)
+            return this.rotinaService.buscarPorUsuario(usuarioId)
                     .orElseThrow(() -> new CronogramaException(
                             400, "Cadastre sua rotina antes de gerar o cronograma."));
         }
@@ -112,7 +125,10 @@ public class CronogramaService
         {
             throw new CronogramaException(erro.getStatus(), erro.getMessage());
         }
+    }
 
+    private List<BlocoDeEstudo> gerarBlocosDaSemana(Rotina rotina, LocalDate segunda)
+    {
         List<BlocoDeEstudo> blocosGerados = this.geradorDeCronograma.gerar(rotina, segunda);
         if (blocosGerados.isEmpty())
             throw new CronogramaException(
