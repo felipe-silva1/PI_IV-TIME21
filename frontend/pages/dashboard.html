@@ -26,7 +26,7 @@
         </div>
         <section class="painel-progresso" id="progresso-painel" aria-labelledby="titulo-progresso">
             <div class="painel-progresso-topo">
-                <h2 id="titulo-progresso">Progresso semanal</h2>
+                <h2 id="titulo-progresso">Progresso semanal <span id="progresso-periodo"></span></h2>
                 <span id="progresso-percentual" class="painel-progresso-percentual">0%
                 </span>
             </div>
@@ -41,7 +41,7 @@
                 <p id="semana-status" role="status"></p>
 
                 <div class="painel-semana-rolagem" id="semana-rolagem"
-                     role="region" aria-label="Dias do cronograma semanal"
+                     role="region" aria-labelledby="titulo-semana"
                      tabindex="0" hidden>
                     <div class="painel-semana-dias" id="semana-dias"></div>
                 </div>
@@ -54,6 +54,11 @@
                         <li><span class="painel-semana-marca pendente"></span> Pendente</li>
                     </ul>
                 </div>
+
+                <p class="painel-proximo-estudo" id="proximo-estudo" hidden>
+                    <strong>Próximo estudo</strong>
+                    <span id="proximo-estudo-detalhes"></span>
+                </p>
 
                 <button type="button" class="botao" data-pagina="cronograma.html">   
                     Ver cronograma completo

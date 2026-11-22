@@ -8,19 +8,24 @@
     };
     const API_CRONOGRAMAS = 'http://localhost:8080/api/cronogramas';
     const API_PROGRESSO = 'http://localhost:8080/api/progresso';
-    const DIAS_SEMANA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+    const API_ROTINAS = 'http://localhost:8080/api/rotinas';
+    const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const dataCurta = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
     const ORDEM_TURNOS = ['MANHA', 'TARDE', 'NOITE'];
 
     const semanaDias = document.querySelector('#semana-dias');
     const semanaStatus = document.querySelector('#semana-status');
     const semanaRolagem = document.querySelector('#semana-rolagem');
     const semanaLegenda = document.querySelector('#semana-legenda');
+    const proximoEstudo = document.querySelector('#proximo-estudo');
+    const proximoEstudoDetalhes = document.querySelector('#proximo-estudo-detalhes');
     let consultaDaSemana;
 
     const lista = document.querySelector('#tarefas-lista');
     const status = document.querySelector('#tarefas-status');
 
     const progressoStatus = document.querySelector('#progresso-status');
+    const progressoPeriodo = document.querySelector('#progresso-periodo');
     const progressoPercentual = document.querySelector('#progresso-percentual');
     const progressoBarra = document.querySelector('#progresso-barra');
     const progressoTarefas = document.querySelector('#progresso-tarefas');
@@ -39,12 +44,24 @@
         return resultado;
     }
 
+    function inicioDaSemana(data) {
+        return somarDias(data, -((data.getDay() + 6) % 7));
+    }
+
+    async function buscarCriacaoDaRotina(signal) {
+        const resposta = await requisicaoAutenticada(API_ROTINAS, { signal });
+        if (!resposta.ok) return null;
+
+        const rotina = await resposta.json();
+        return rotina.criadoEm > 0 ? new Date(rotina.criadoEm) : null;
+    }
+
     function formatarHoras(valor) {
         const numero = Number(valor ?? 0);
         return Number.isInteger(numero) ? `${numero}h` : `${numero.toFixed(1)}h`;
     }
 
-    // Compartilha a gravação do status entre o checklist de hoje e a prévia semanal.
+    // Compartilha a gravação do status entre o checklist de hoje e a prévia do cronograma.
     function configurarCheckboxTarefa(tarefa, checkbox, atualizarVisual, erroAoSalvar) {
         let concluidaSalva = tarefa.concluido === true;
         checkbox.checked = concluidaSalva;
@@ -192,7 +209,7 @@
         }
     }
 
-    // Monta o cartão clicável da semana usando um checkbox que ocupa toda a área.
+    // Monta o cartão clicável usando um checkbox que ocupa toda a área.
     function criarBlocoDaSemana(bloco, hojeISO) {
         const item = document.createElement('li');
         const rotulo = document.createElement('label');
@@ -207,18 +224,13 @@
         erroAoSalvar.setAttribute('role', 'status');
 
         const turno = TURNOS[bloco.turno] ?? bloco.turno;
-        // Ao desmarcar um bloco, a data determina se ele volta a atrasado ou pendente.
-        const estadoEmAberto = bloco.data < hojeISO ? 'atrasado' : 'pendente';
-        const rotulos = {
-            concluido: 'Concluído',
-            atrasado: 'Atrasado',
-            pendente: 'Pendente'
-        };
+        const atrasado = bloco.data < hojeISO;
 
         function atualizarVisual() {
-            const estado = checkbox.checked ? 'concluido' : estadoEmAberto;
+            const estado = checkbox.checked ? 'concluido' : atrasado ? 'atrasado' : 'pendente';
+            const descricao = checkbox.checked ? 'Concluído' : atrasado ? 'Atrasado' : 'Pendente';
             item.className = `painel-semana-bloco ${estado}`;
-            detalhes.textContent = ` — ${turno}, ${rotulos[estado]}`;
+            detalhes.textContent = ` — ${turno}, ${descricao}`;
         }
 
         configurarCheckboxTarefa(bloco, checkbox, atualizarVisual, erroAoSalvar);
@@ -229,10 +241,11 @@
         return item;
     }
 
-    function renderizarSemana(segunda, hojeISO, blocos) {
+    function renderizarSemana(inicio, hojeISO, blocos) {
         let totalLinhas = 1;
-        const dias = DIAS_SEMANA.map((nome, indice) => {
-            const data = dataLocalISO(somarDias(segunda, indice));
+        const dias = Array.from({ length: 7 }, (_, indice) => {
+            const diaDaPrevia = somarDias(inicio, indice);
+            const data = dataLocalISO(diaDaPrevia);
 
             const dia = document.createElement('div');
             dia.className = 'painel-semana-dia';
@@ -240,7 +253,8 @@
             const titulo = document.createElement('h3');
             const rotulo = document.createElement('time');
             rotulo.dateTime = data;
-            rotulo.textContent = nome;
+            rotulo.textContent = `${DIAS_SEMANA[diaDaPrevia.getDay()]} ${diaDaPrevia.getDate()}`;
+            rotulo.title = dataCurta.format(diaDaPrevia);
 
             if (data === hojeISO) {
                 rotulo.setAttribute('aria-current', 'date');
@@ -265,47 +279,95 @@
         semanaLegenda.hidden = false;
     }
 
+    async function buscarBlocosDaSemana(segunda, signal) {
+        const parametros = new URLSearchParams({ semana: dataLocalISO(segunda) });
+        const resposta = await requisicaoAutenticada(`${API_CRONOGRAMAS}?${parametros}`, { signal });
+
+        if (signal.aborted) return null;
+        if (resposta.status === 401) {
+            limparSessao();
+            location.replace('../login.html');
+            return null;
+        }
+        if (resposta.status === 404) return [];
+        if (!resposta.ok) {
+            const mensagem = await mensagemDeErro(resposta).catch(
+                () => 'Não foi possível carregar o cronograma da semana.'
+            );
+            throw new Error(mensagem);
+        }
+
+        const cronograma = await resposta.json();
+        return cronograma.blocos ?? [];
+    }
+
+    function encontrarProximoEstudo(blocos, hojeISO) {
+        return blocos.filter(bloco => !bloco.concluido && bloco.data >= hojeISO)
+            .sort((a, b) => a.data.localeCompare(b.data)
+                || ORDEM_TURNOS.indexOf(a.turno) - ORDEM_TURNOS.indexOf(b.turno))[0];
+    }
+
+    function renderizarProximoEstudo(proximo) {
+        proximoEstudo.hidden = !proximo;
+        if (proximo) {
+            const [, mes, dia] = proximo.data.split('-');
+            const turno = TURNOS[proximo.turno] ?? proximo.turno;
+            proximoEstudoDetalhes.textContent = `${dia}/${mes} · ${proximo.materia} · ${turno}`;
+        }
+    }
+
     async function carregarResumoDaSemana() {
         consultaDaSemana?.abort();
         consultaDaSemana = new AbortController();
         const { signal } = consultaDaSemana;
         const hoje = new Date();
         const hojeISO = dataLocalISO(hoje);
-        const segunda = somarDias(hoje, -((hoje.getDay() + 6) % 7));
-        const parametros = new URLSearchParams({ semana: dataLocalISO(segunda) });
+        const segunda = inicioDaSemana(hoje);
+        const segundaISO = dataLocalISO(segunda);
 
         semanaStatus.textContent = 'Carregando cronograma…';
 
         try {
-            const resposta = await requisicaoAutenticada(
-                `${API_CRONOGRAMAS}?${parametros}`,
-                { signal }
-            );
+            const [criacao, blocosDaSemana] = await Promise.all([
+                buscarCriacaoDaRotina(signal).catch(() => null),
+                buscarBlocosDaSemana(segunda, signal)
+            ]);
+            if (signal.aborted || blocosDaSemana === null) return;
 
-            if (signal.aborted) return;
+            // A primeira prévia fica ancorada na criação até a próxima segunda-feira.
+            const criacaoISO = criacao && dataLocalISO(criacao);
+            const primeiraPrevia = criacaoISO > segundaISO && criacaoISO <= hojeISO;
+            const inicio = primeiraPrevia ? criacao : segunda;
+            const inicioISO = dataLocalISO(inicio);
+            const fimISO = dataLocalISO(somarDias(inicio, 6));
 
-            if (resposta.status === 401) {
-                limparSessao();
-                location.replace('../login.html');
-                return;
+            let blocos = blocosDaSemana;
+            let falhaNaPrevia = false;
+            if (primeiraPrevia || !encontrarProximoEstudo(blocosDaSemana, hojeISO)) {
+                const blocosSeguintes = await buscarBlocosDaSemana(somarDias(segunda, 7), signal)
+                    .catch(() => {
+                        falhaNaPrevia = primeiraPrevia;
+                        return [];
+                    });
+                if (signal.aborted || blocosSeguintes === null) return;
+                blocos = blocos.concat(blocosSeguintes);
             }
 
-            if (resposta.status === 404) {
-                semanaStatus.textContent = 'O cronograma desta semana ainda não foi gerado.';
-                return;
+            const blocosDaPrevia = blocos.filter(bloco => bloco.data >= inicioISO && bloco.data <= fimISO);
+            if (blocosDaPrevia.length === 0) {
+                semanaRolagem.hidden = true;
+                semanaLegenda.hidden = true;
+            } else {
+                renderizarSemana(inicio, hojeISO, blocosDaPrevia);
+            }
+            semanaStatus.textContent = blocosDaPrevia.length > 0
+                ? ''
+                : 'Nenhum estudo previsto neste período.';
+            if (falhaNaPrevia) {
+                semanaStatus.textContent = 'Não foi possível carregar parte do cronograma.';
             }
 
-            if (!resposta.ok) {
-                const mensagem = await mensagemDeErro(resposta).catch(
-                    () => 'Não foi possível carregar o cronograma da semana.'
-                );
-                throw new Error(mensagem);
-            }
-
-            const cronograma = await resposta.json();
-            if (signal.aborted) return;
-            renderizarSemana(segunda, hojeISO, cronograma.blocos ?? []);
-            semanaStatus.textContent = '';
+            renderizarProximoEstudo(encontrarProximoEstudo(blocos, hojeISO));
         } catch (erro) {
             if (signal.aborted) return;
             semanaStatus.textContent = erro instanceof TypeError
@@ -356,9 +418,10 @@
         consultaDeProgresso = new AbortController();
         const { signal } = consultaDeProgresso;
 
-        const hoje = new Date();
-        const segunda = somarDias(hoje, -((hoje.getDay() + 6) % 7));
+        const segunda = inicioDaSemana(new Date());
         const parametros = new URLSearchParams({ semana: dataLocalISO(segunda) });
+        progressoPeriodo.textContent =
+            `(${dataCurta.format(segunda)} a ${dataCurta.format(somarDias(segunda, 6))})`;
 
         progressoStatus.textContent = 'Carregando progresso…';
 
@@ -404,7 +467,21 @@
         }
     });
 
+    function atualizarNaViradaDoDia() {
+        const agora = new Date();
+        const amanha = somarDias(agora, 1);
+        amanha.setHours(0, 0, 0, 0);
+
+        setTimeout(() => {
+            carregarTarefasDeHoje();
+            carregarResumoDaSemana();
+            carregarProgresso();
+            atualizarNaViradaDoDia();
+        }, amanha - agora);
+    }
+
     carregarTarefasDeHoje();
     carregarResumoDaSemana();
     carregarProgresso();
+    atualizarNaViradaDoDia();
 })();

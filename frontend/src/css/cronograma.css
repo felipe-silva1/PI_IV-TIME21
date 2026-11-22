@@ -86,7 +86,7 @@
     gap: var(--espaco-1);
     padding: var(--espaco-2);
     background-color: var(--subfundo);
-    border-inline-start: 3px solid var(--alerta);
+    border-inline-start: 3px solid var(--azul-secundario);
     border-radius: var(--raio);
 }
 
@@ -163,6 +163,10 @@
 
 .cronograma-bloco.concluido {
     border-inline-start-color: var(--sucesso);
+}
+
+.cronograma-bloco.atrasado {
+    border-inline-start-color: var(--alerta);
 }
 
 .cronograma-bloco-rotulo {

@@ -125,10 +125,12 @@
         let concluidoSalvo = bloco.concluido === true;
 
         function atualizarVisual() {
-            const status = concluidoSalvo ? 'Concluído' : 'Pendente';
+            const atrasado = !concluidoSalvo && bloco.data < dataISO(new Date());
+            const status = concluidoSalvo ? 'Concluído' : atrasado ? 'Atrasado' : 'Pendente';
 
             checkbox.checked = concluidoSalvo;
             item.classList.toggle('concluido', concluidoSalvo);
+            item.classList.toggle('atrasado', atrasado);
             estado.textContent = `${bloco.duracaoMin} min · ${status}`;
         }
 
