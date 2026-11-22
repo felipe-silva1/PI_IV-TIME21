@@ -242,6 +242,10 @@ public class SupervisoraDeConexao extends Thread
                                                 pedido.toString());
                     this.usuario.receba (this.operacoesDeCronograma.atualizarTarefa (pedido));
                 }
+                else if (comunicado instanceof PedidoParaSalvarPomodoro pedido)
+                    this.usuario.receba (this.operacoesDeCronograma.salvarPomodoro (pedido));
+                else if (comunicado instanceof PedidoParaBuscarPomodoros pedido)
+                    this.usuario.receba (this.operacoesDeCronograma.buscarPomodoros (pedido));
                 else if (comunicado instanceof PedidoParaSair)
                     break;
                 else
