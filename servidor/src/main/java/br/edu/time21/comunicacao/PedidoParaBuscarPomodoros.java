@@ -1,8 +1,10 @@
+// Autor: Felipe Augusto dos Santos Silva RA: 25003353
 package br.edu.time21.comunicacao;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/** Consulta o intervalo [inicio, fim) em milissegundos e os vínculos das tarefas do cronograma. */
 public final class PedidoParaBuscarPomodoros extends Pedido
 {
     private static final long serialVersionUID = 1L;

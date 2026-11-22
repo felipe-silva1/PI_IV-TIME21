@@ -1,5 +1,7 @@
+// Autor: Felipe Augusto dos Santos Silva RA: 25003353
 package br.edu.time21.comunicacao;
 
+/** Registra um ciclo de foco. O ID permanece o mesmo nas tentativas e a tarefa é opcional. */
 public final class PedidoParaSalvarPomodoro extends Pedido
 {
     private static final long serialVersionUID = 1L;
