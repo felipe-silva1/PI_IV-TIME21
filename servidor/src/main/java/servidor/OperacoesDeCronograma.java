@@ -4,8 +4,13 @@ import com.mongodb.MongoSocketException;
 import com.mongodb.MongoTimeoutException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -25,6 +30,7 @@ import br.edu.time21.comunicacao.*;
 // SupervisorasDeConexao.
 public class OperacoesDeCronograma {
     public static final String COLECAO = "blocos_de_estudo";
+    private static final int MINUTOS_POR_POMODORO = 25;
 
     private static final Set<String> TURNOS = Set.of (TurnoLivre.MANHA, TurnoLivre.TARDE, TurnoLivre.NOITE);
     
@@ -33,6 +39,7 @@ public class OperacoesDeCronograma {
     // antes de TARDE)
     private static final List<String> ORDEM_DOS_TURNOS = List.of (TurnoLivre.MANHA, TurnoLivre.TARDE, TurnoLivre.NOITE);
     private MongoCollection<Document> colecao;
+    private final MongoCollection<Document> pomodoros;
 
     public OperacoesDeCronograma (MongoDatabase banco) throws Exception
     {
@@ -40,6 +47,7 @@ public class OperacoesDeCronograma {
             throw new Exception ("Banco ausente");
 
         this.colecao = banco.getCollection (OperacoesDeCronograma.COLECAO);
+        this.pomodoros = banco.getCollection ("sessoes_pomodoro");
     }
 
     // os dois indices previstos no dicionario: (usuarioId, semanaInicio)
@@ -53,10 +61,136 @@ public class OperacoesDeCronograma {
         {
             this.colecao.createIndex (Indexes.ascending ("usuarioId", "semanaInicio"));
             this.colecao.createIndex (Indexes.ascending ("usuarioId", "data"));
+            this.pomodoros.createIndex (Indexes.ascending ("usuarioId", "concluidoEm"));
+            this.pomodoros.createIndex (Indexes.ascending ("usuarioId", "tarefaId"));
         }
         catch (Exception erro)
         {
             System.err.println("Falha ao criar indices em "+ OperacoesDeCronograma.COLECAO + ": " + erro.getMessage());
+        }
+    }
+
+    public Resposta salvarPomodoro(PedidoParaSalvarPomodoro pedido)
+    {
+        String usuario = pedido.getUsuarioId();
+        String sessao = pedido.getSessaoId();
+        String tarefa = pedido.getTarefaId();
+        long concluidoEm = pedido.getConcluidoEm();
+
+        if (usuario == null || !ObjectId.isValid(usuario) || !uuidValido(sessao)
+                || (tarefa != null && !ObjectId.isValid(tarefa))
+                || concluidoEm <= 0 || concluidoEm > System.currentTimeMillis() + 60_000)
+            return new RespostaDeErro(RespostaDeErro.PEDIDO_INVALIDO, "Sessao Pomodoro invalida.");
+
+        try
+        {
+            ObjectId usuarioId = new ObjectId(usuario);
+            Bson chave = Filters.eq("_id", usuarioId.toHexString() + ":" + sessao);
+            ObjectId tarefaId = tarefa == null ? null : new ObjectId(tarefa);
+            if (tarefaId != null && colecao.find(Filters.and(
+                    Filters.eq("_id", tarefaId), Filters.eq("usuarioId", usuarioId)))
+                    .projection(Projections.include("_id")).first() == null)
+                tarefaId = null; // Preserva o tempo mesmo se o cronograma tiver sido regerado durante o foco.
+
+            // A chave única garante que a mesma sessão seja contabilizada uma vez.
+            Document sessaoSalva = pomodoros.findOneAndUpdate(chave, Updates.combine(
+                    Updates.setOnInsert("usuarioId", usuarioId),
+                    Updates.setOnInsert("tarefaId", tarefaId),
+                    Updates.setOnInsert("concluidoEm", new Date(concluidoEm)),
+                    Updates.setOnInsert("duracaoMin", MINUTOS_POR_POMODORO)),
+                    new FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER));
+
+            // Use o vínculo persistido para que um reenvio avalie a mesma tarefa.
+            ObjectId tarefaSalva = sessaoSalva.getObjectId("tarefaId");
+            if (tarefaSalva != null)
+                concluirTarefaPorPomodoro(usuarioId, tarefaSalva);
+
+            return new RespostaDePomodoroSalvo();
+        }
+        catch (Exception erro)
+        {
+            return erroDeBanco("salvar Pomodoro", erro);
+        }
+    }
+
+    private void concluirTarefaPorPomodoro(ObjectId usuarioId, ObjectId tarefaId)
+    {
+        Document total = pomodoros.aggregate(List.of(
+                Aggregates.match(Filters.and(
+                        Filters.eq("usuarioId", usuarioId), Filters.eq("tarefaId", tarefaId))),
+                Aggregates.group(null,
+                        Accumulators.sum("minutos", "$duracaoMin"),
+                        Accumulators.max("ultimoFoco", "$concluidoEm"))
+        )).first();
+        if (total == null) return;
+
+        long minutos = ((Number) total.get("minutos")).longValue();
+        Bson tarefaComMetaAtingida = Filters.and(
+                Filters.eq("_id", tarefaId),
+                Filters.eq("usuarioId", usuarioId),
+                Filters.lte("duracaoMin", minutos),
+                Filters.ne("metaPomodoroAtingida", true));
+
+        // Aplica a conclusão uma vez por tarefa, preservando uma reabertura manual.
+        Document atualizacao = new Document("metaPomodoroAtingida", true)
+                .append("concluido", true)
+                .append("concluidoEm", new Document("$cond", List.of(
+                        new Document("$eq", List.of("$concluido", true)),
+                        "$concluidoEm",
+                        total.getDate("ultimoFoco"))));
+        colecao.updateOne(tarefaComMetaAtingida, List.of(new Document("$set", atualizacao)));
+    }
+
+    public Resposta buscarPomodoros(PedidoParaBuscarPomodoros pedido)
+    {
+        String usuario = pedido.getUsuarioId();
+        long inicio = pedido.getInicio();
+        long fim = pedido.getFim();
+        if (usuario == null || !ObjectId.isValid(usuario) || inicio >= fim)
+            return new RespostaDeErro(RespostaDeErro.PEDIDO_INVALIDO, "Periodo de Pomodoro invalido.");
+
+        try
+        {
+            List<ObjectId> tarefas = pedido.getTarefas().stream()
+                    .filter(ObjectId::isValid).map(ObjectId::new).toList();
+            Bson periodo = Filters.and(Filters.gte("concluidoEm", new Date(inicio)),
+                    Filters.lt("concluidoEm", new Date(fim)));
+            // Sessões de outras semanas também indicam que a tarefa já tem tempo medido.
+            Bson consulta = tarefas.isEmpty() ? periodo : Filters.or(periodo, Filters.in("tarefaId", tarefas));
+            Bson filtro = Filters.and(Filters.eq("usuarioId", new ObjectId(usuario)), consulta);
+            long minutos = 0;
+            Set<String> tarefasComFoco = new HashSet<>();
+
+            for (Document sessao : pomodoros.find(filtro)
+                    .projection(Projections.include("concluidoEm", "duracaoMin", "tarefaId")))
+            {
+                long conclusao = sessao.getDate("concluidoEm").getTime();
+                if (conclusao >= inicio && conclusao < fim)
+                    minutos += sessao.getInteger("duracaoMin");
+
+                ObjectId tarefa = sessao.getObjectId("tarefaId");
+                if (tarefa != null)
+                    tarefasComFoco.add(tarefa.toHexString());
+            }
+
+            return new RespostaDePomodoros(minutos, tarefasComFoco);
+        }
+        catch (Exception erro)
+        {
+            return erroDeBanco("buscar Pomodoros", erro);
+        }
+    }
+
+    private static boolean uuidValido(String valor)
+    {
+        if (valor == null) return false;
+        try
+        {
+            return UUID.fromString(valor).toString().equals(valor);
+        }
+        catch (IllegalArgumentException erro)
+        {
+            return false;
         }
     }
 
