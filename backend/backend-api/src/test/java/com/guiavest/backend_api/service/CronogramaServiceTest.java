@@ -61,4 +61,44 @@ class CronogramaServiceTest
                 primeiraSemana.getBlocos().stream().map(Bloco::getData).toList()
         );
     }
+    @Test
+    void pulaPrimeiraSemanaSemTurnosNoPeriodoEContinuaNasSeguintes()
+    {
+        String usuarioId = "usuario";
+        ClienteSocket socket = mock(ClienteSocket.class);
+        RotinaService rotinaService = mock(RotinaService.class);
+        CronogramaService servico =
+                new CronogramaService(socket, rotinaService, new GeradorDeCronograma());
+
+        Rotina rotina = new Rotina(
+                usuarioId,
+                "ENEM",
+                List.of(new TurnoLivre(1, TurnoLivre.MANHA)),
+                List.of("Matemática")
+        );
+
+        when(rotinaService.buscarPorUsuario(usuarioId)).thenReturn(Optional.of(rotina));
+        when(socket.enviar(any(PedidoParaBuscarCronograma.class)))
+                .thenReturn(new RespostaDeCronograma(null));
+        when(socket.enviar(any(PedidoParaSalvarCronograma.class)))
+                .thenAnswer(chamada -> {
+                    PedidoParaSalvarCronograma pedido = chamada.getArgument(0);
+                    return new RespostaDeCronograma(pedido.getCronograma());
+                });
+
+        servico.gerarPrimeiroMes(usuarioId, LocalDate.of(2026, 11, 21));
+
+        var gravacoes = forClass(PedidoParaSalvarCronograma.class);
+        verify(socket, atLeastOnce()).enviar(gravacoes.capture());
+
+        List<String> semanasGravadas = gravacoes.getAllValues().stream()
+                .map(PedidoParaSalvarCronograma::getCronograma)
+                .map(Cronograma::getSemanaInicio)
+                .toList();
+
+        assertEquals(
+                List.of("2026-11-23", "2026-11-30", "2026-12-07", "2026-12-14"),
+                semanasGravadas
+        );
+    }
 }
