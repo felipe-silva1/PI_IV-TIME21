@@ -1,0 +1,39 @@
+.lembretes-opcoes {
+    display: grid;
+    gap: var(--espaco-4);
+    max-width: 42rem;
+    margin-top: var(--espaco-5);
+}
+
+.lembrete-opcao {
+    display: grid;
+    gap: var(--espaco-2);
+    padding: var(--espaco-4);
+    background: var(--card);
+    border: 1px solid var(--subfundo);
+    border-radius: var(--raio);
+}
+
+.lembrete-opcao-controle {
+    display: flex;
+    align-items: center;
+    gap: var(--espaco-3);
+    min-height: 44px;
+    cursor: pointer;
+}
+
+.lembrete-opcao-controle input {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--azul-primario);
+}
+
+.lembrete-opcao p {
+    color: var(--texto-suave);
+    font-size: 0.875rem;
+}
+
+#lembretes-site-status,
+#lembretes-email-status {
+    min-height: 1.25rem;
+}

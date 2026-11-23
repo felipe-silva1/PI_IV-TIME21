@@ -6,6 +6,7 @@
     <title>GuiaVest - Lembretes</title>
     <link rel="stylesheet" href="../src/css/base.css">
     <link rel="stylesheet" href="../src/css/layout.css">
+    <link rel="stylesheet" href="../src/css/lembretes.css">
 </head>
 <body>
     <header class="topo">
@@ -19,11 +20,35 @@
 
     <main class="conteudo">
         <h1>Lembretes</h1>
+        <section class="lembretes-opcoes" aria-label="Preferências de lembretes">
+            <div class="lembrete-opcao">
+                <label class="lembrete-opcao-controle" for="lembretes-site-ativo">
+                    <input type="checkbox" id="lembretes-site-ativo">
+                    <strong>Lembretes do site</strong>
+                </label>
+                <p>Ative as notificações do navegador para receber avisos na hora dos
+                    blocos: manhã às 05:00, tarde às 14:00 e noite às 18:00. O site
+                    precisa estar aberto.</p>
+                <small id="lembretes-site-status" role="status"></small>
+            </div>
+            <div class="lembrete-opcao">
+                <label class="lembrete-opcao-controle" for="lembretes-email-ativo">
+                    <input type="checkbox" id="lembretes-email-ativo">
+                    <strong>Lembretes por e-mail</strong>
+                </label>
+                <p>Ative sua preferência para receber e-mails dos blocos programados.
+                    Esta opção pode ser desativada sem alterar os lembretes do site.</p>
+                <small id="lembretes-email-status" role="status"></small>
+            </div>
+        </section>
         <div class="grade">
             <button type="button" class="botao" data-pagina="dashboard.html">Voltar</button>
         </div>
     </main>
 
     <script src="../src/js/navegacao.js"></script>
+    <script src="../src/js/auth.js"></script>
+    <script src="../src/js/lembretes.js"></script>
+    <script src="../src/js/lembretes-global.js"></script>
 </body>
 </html>
