@@ -1,3 +1,4 @@
+//Autor: Arthur Berto de Castro RA: 25009917
 package servidor;
 
 import java.io.*;
@@ -8,14 +9,18 @@ import br.edu.time21.comunicacao.Comunicado;
 
 public class Parceiro
 {
+    // Recursos usados para a comunicação com o cliente.
     private Socket             conexao;
     private ObjectInputStream  receptor;
     private ObjectOutputStream transmissor;
 
+    // Armazena temporariamente o próximo comunicado recebido.
     private Comunicado proximoComunicado=null;
 
+    // Garante acesso seguro às operações de leitura.
     private Semaphore mutEx = new Semaphore (1,true);
 
+    // Valida e configura os recursos da conexão.
     public Parceiro (Socket             conexao,
                      ObjectInputStream  receptor,
                      ObjectOutputStream transmissor)
@@ -40,6 +45,7 @@ public class Parceiro
         return String.valueOf (this.conexao.getRemoteSocketAddress());
     }
 
+    // Envia um comunicado ao cliente de forma sincronizada.
     // synchronized: a supervisora e o Servidor (comando "desativar")
     // podem escrever no mesmo transmissor ao mesmo tempo
     public void receba (Comunicado x) throws Exception
@@ -58,6 +64,7 @@ public class Parceiro
         }
     }
 
+    // Consulta o próximo comunicado sem removê-lo da fila.
     public Comunicado espie () throws Exception
     {
         this.mutEx.acquireUninterruptibly();
@@ -78,6 +85,7 @@ public class Parceiro
         }
     }
 
+    // Lê e remove o próximo comunicado disponível.
     public Comunicado envie () throws Exception
     {
         this.mutEx.acquireUninterruptibly();

@@ -1,3 +1,4 @@
+:: Arthur Berto de Castro RA: 25009917
 @echo off
 title Backend API GuiaVest (Porta 8080)
 echo ===================================================

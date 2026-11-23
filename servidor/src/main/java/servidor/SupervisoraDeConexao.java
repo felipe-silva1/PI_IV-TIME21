@@ -1,3 +1,4 @@
+//Autor: Arthur Berto de Castro RA: 25009917
 package servidor;
 
 import java.io.*;
@@ -29,6 +30,7 @@ public class SupervisoraDeConexao extends Thread
     private OperacoesDeRotina      operacoesDeRotina;
     private OperacoesDeCronograma  operacoesDeCronograma;
 
+    // Valida os recursos necessários antes de iniciar a supervisora.
     public SupervisoraDeConexao
     (Socket conexao, ArrayList<Parceiro> usuarios, RepositorioDeChamadas repositorio,
      OperacoesDeRotina operacoesDeRotina, OperacoesDeCronograma operacoesDeCronograma)
@@ -112,6 +114,7 @@ public class SupervisoraDeConexao extends Thread
 
         try
         {
+            // Registra o cliente na lista de conexões ativas.
             synchronized (this.usuarios)
             {
                 this.usuarios.add (this.usuario);
@@ -121,12 +124,14 @@ public class SupervisoraDeConexao extends Thread
 
             for(;;)
             {
+                // Aguarda e identifica o próximo pedido do cliente.
                 Comunicado comunicado = this.usuario.envie ();
 
                 if (comunicado==null)
                     break;
                 else if (comunicado instanceof PedidoDeStatus)
                 {
+                    // Retorna estado do servidor e da conexão atual.
                     this.repositorio.registrar ("PEDIDO_DE_STATUS", origem, null);
 
                     int ativas;
@@ -143,6 +148,7 @@ public class SupervisoraDeConexao extends Thread
                 }
                 else if (comunicado instanceof PedidoDeCadastro pedido)
                 {
+                    // Valida os dados antes de cadastrar o usuário.
                     if (pedido.getNome() == null || pedido.getNome().isBlank()
                             || pedido.getEmail() == null || pedido.getEmail().isBlank()
                             || pedido.getSenhaHash() == null || pedido.getSenhaHash().isBlank())
@@ -172,6 +178,7 @@ public class SupervisoraDeConexao extends Thread
                 }
                 else if (comunicado instanceof PedidoDeLogin pedido)
                 {
+                    // Valida e consulta as credenciais no banco.
                     if (pedido.getEmail() == null || pedido.getEmail().isBlank())
                     {
                         this.usuario.receba(new RespostaDeErro(
@@ -208,43 +215,51 @@ public class SupervisoraDeConexao extends Thread
                 }
                 else if (comunicado instanceof PedidoParaSalvarRotina pedido)
                 {
+                    // Persiste uma rotina enviada pelo cliente.
                     this.repositorio.registrar ("PEDIDO_PARA_SALVAR_ROTINA", origem,
                                                 pedido.toString());
                     this.usuario.receba (this.operacoesDeRotina.salvar (pedido));
                 }
                 else if (comunicado instanceof PedidoParaBuscarRotina pedido)
                 {
+                    // Busca uma rotina existente no banco.
                     this.repositorio.registrar ("PEDIDO_PARA_BUSCAR_ROTINA", origem,
                                                 pedido.toString());
                     this.usuario.receba (this.operacoesDeRotina.buscar (pedido));
                 }
                 else if (comunicado instanceof PedidoParaSalvarCronograma pedido)
                 {
+                    // Persiste o cronograma enviado pelo cliente.
                     this.repositorio.registrar ("PEDIDO_PARA_SALVAR_CRONOGRAMA", origem,
                                                 pedido.toString());
                     this.usuario.receba (this.operacoesDeCronograma.salvar (pedido));
                 }
                 else if (comunicado instanceof PedidoParaBuscarCronograma pedido)
                 {
+                    // Busca o cronograma associado ao pedido.
                     this.repositorio.registrar ("PEDIDO_PARA_BUSCAR_CRONOGRAMA", origem,
                                                 pedido.toString());
                     this.usuario.receba (this.operacoesDeCronograma.buscar (pedido));
                 }
                 else if (comunicado instanceof PedidoParaBuscarTarefas pedido)
                 {
+                    // Recupera as tarefas do cronograma.
                     this.repositorio.registrar ("PEDIDO_PARA_BUSCAR_TAREFAS", origem,
                                                 pedido.toString());
                     this.usuario.receba (this.operacoesDeCronograma.buscarTarefas (pedido));
                 }
                 else if (comunicado instanceof PedidoParaAtualizarTarefa pedido)
                 {
+                    // Atualiza o estado de uma tarefa existente.
                     this.repositorio.registrar ("PEDIDO_PARA_ATUALIZAR_TAREFA", origem,
                                                 pedido.toString());
                     this.usuario.receba (this.operacoesDeCronograma.atualizarTarefa (pedido));
                 }
                 else if (comunicado instanceof PedidoParaSalvarPomodoro pedido)
+                    // Persiste os dados de uma sessão Pomodoro.
                     this.usuario.receba (this.operacoesDeCronograma.salvarPomodoro (pedido));
                 else if (comunicado instanceof PedidoParaBuscarPomodoros pedido)
+                    // Recupera as sessões Pomodoro registradas.
                     this.usuario.receba (this.operacoesDeCronograma.buscarPomodoros (pedido));
                 else if (comunicado instanceof PedidoParaSair)
                     break;
@@ -268,6 +283,7 @@ public class SupervisoraDeConexao extends Thread
         }
         finally
         {
+            // Remove o cliente e encerra os recursos da conexão.
             synchronized (this.usuarios)
             {
                 this.usuarios.remove (this.usuario);
