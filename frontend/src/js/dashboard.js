@@ -56,9 +56,13 @@
         return rotina.criadoEm > 0 ? new Date(rotina.criadoEm) : null;
     }
 
+    // Exibe os minutos de foco sem arredondar o visor para décimos de hora.
     function formatarHoras(valor) {
-        const numero = Number(valor ?? 0);
-        return Number.isInteger(numero) ? `${numero}h` : `${numero.toFixed(1)}h`;
+        const totalMinutos = Math.round(Number(valor ?? 0) * 60);
+        const horas = Math.floor(totalMinutos / 60);
+        const minutos = totalMinutos % 60;
+        if (horas === 0) return `${minutos} min`;
+        return minutos === 0 ? `${horas} h` : `${horas} h ${minutos} min`;
     }
 
     // Compartilha a gravação do status entre o checklist de hoje e a prévia do cronograma.
@@ -406,8 +410,9 @@
         }
 
         if (progressoHoras) {
-            progressoHoras.textContent =
-                `Horas: ${formatarHoras(horasCumpridas)} de ${formatarHoras(horasPlanejadas)} (${percentualHoras}%)`;
+            progressoHoras.textContent = horasPlanejadas > 0
+                ? `Horas: ${formatarHoras(horasCumpridas)} de ${formatarHoras(horasPlanejadas)} (${percentualHoras}%)`
+                : `Tempo estudado: ${formatarHoras(horasCumpridas)}`;
         }
     }
 

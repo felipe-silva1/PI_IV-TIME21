@@ -1,0 +1,50 @@
+<!--Autor: Felipe Augusto dos Santos Silva RA: 25003353-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>GuiaVest - Pomodoro</title>
+        <link rel="stylesheet" href="../src/css/base.css">
+        <link rel="stylesheet" href="../src/css/layout.css">
+        <link rel="stylesheet" href="../src/css/pomodoro.css">
+    </head>
+    <body class="pomodoro" data-fase="foco">
+        <header class="topo">
+            <span class="logo">GuiaVest</span>
+            <button type="button" class="botao" data-pagina="dashboard.html">
+                Voltar ao painel
+            </button>
+        </header>
+
+        <main class="conteudo pomodoro-conteudo">
+            <section class="pomodoro-cartao" aria-labelledby="pomodoro-titulo">
+                <h1 id="pomodoro-titulo" class="pomodoro-titulo">
+                    <img src="../assets/imagens/tomate.png" width="36" height="36" alt="">
+                    Pomodoro
+                </h1>
+                <p id="pomodoro-fase" role="status">Foco · rodada 1 de 4</p>
+                <p id="pomodoro-tempo" class="pomodoro-tempo" role="timer">25:00</p>
+
+                <div class="pomodoro-tarefa">
+                    <label for="pomodoro-tarefa">Tarefa de hoje (opcional)</label>
+                    <select id="pomodoro-tarefa">
+                        <option value="">Estudo livre</option>
+                    </select>
+                </div>
+
+                <div class="pomodoro-acoes">
+                    <button type="button" class="botao" id="pomodoro-iniciar">Iniciar</button>
+                    <button type="button" class="botao" id="pomodoro-reiniciar">Reiniciar etapa</button>
+                </div>
+                <p id="pomodoro-registro" class="pomodoro-registro" role="status"></p>
+                <button type="button" class="botao" id="pomodoro-reenviar" hidden>
+                    Tentar salvar novamente
+                </button>
+            </section>
+        </main>
+        <script src="../src/js/navegacao.js" defer></script>
+        <script src="../src/js/auth.js" defer></script>
+        <script src="../src/js/pomodoro.js" defer></script>
+    </body>
+</html>

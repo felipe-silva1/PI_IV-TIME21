@@ -1,0 +1,64 @@
+/*Autor: Felipe Augusto dos Santos Silva RA: 25003353*/
+/* O fundo indica a fase atual, com a cor de descanso compartilhada pelas duas pausas. */
+.pomodoro {
+    display: flex;
+    flex-direction: column;
+    background-color: #461b24;
+}
+
+.pomodoro[data-fase="pausa-curta"],
+.pomodoro[data-fase="pausa-longa"] {
+    background-color: #123a2c;
+}
+
+.pomodoro-conteudo {
+    display: grid;
+    place-items: center;
+    flex: 1;
+}
+
+.pomodoro-cartao {
+    width: min(100%, 28rem);
+    padding: clamp(1.25rem, 5vw, 2.5rem);
+    border-radius: var(--raio-grande);
+    background-color: var(--card);
+    text-align: center;
+}
+
+.pomodoro-titulo,
+.pomodoro-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espaco-3);
+}
+
+.pomodoro-tempo {
+    margin-block: var(--espaco-4);
+    font-size: clamp(3.5rem, 15vw, 6rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.pomodoro-tarefa {
+    display: grid;
+    gap: var(--espaco-1);
+    margin-bottom: var(--espaco-4);
+    text-align: start;
+}
+
+.pomodoro-tarefa select {
+    min-width: 0;
+    padding: var(--espaco-2);
+    border: 1px solid var(--texto-suave);
+    border-radius: var(--raio);
+    background: var(--subfundo);
+    color: var(--texto);
+}
+
+.pomodoro-registro:not(:empty) {
+    margin-block: var(--espaco-3);
+    color: var(--texto-suave);
+}
