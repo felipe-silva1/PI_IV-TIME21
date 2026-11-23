@@ -28,10 +28,12 @@ public class SupervisoraDeConexao extends Thread
     private RepositorioDeChamadas  repositorio;
     private OperacoesDeRotina      operacoesDeRotina;
     private OperacoesDeCronograma  operacoesDeCronograma;
+    private OperacoesDeLembretes   operacoesDeLembretes;
 
     public SupervisoraDeConexao
     (Socket conexao, ArrayList<Parceiro> usuarios, RepositorioDeChamadas repositorio,
-     OperacoesDeRotina operacoesDeRotina, OperacoesDeCronograma operacoesDeCronograma)
+     OperacoesDeRotina operacoesDeRotina, OperacoesDeCronograma operacoesDeCronograma,
+     OperacoesDeLembretes operacoesDeLembretes)
     throws Exception
     {
         if (conexao==null)
@@ -49,11 +51,15 @@ public class SupervisoraDeConexao extends Thread
         if (operacoesDeCronograma==null)
             throw new Exception ("Operacoes de cronograma ausentes");
 
+        if (operacoesDeLembretes==null)
+            throw new Exception ("Operacoes de lembretes ausentes");
+
         this.conexao           = conexao;
         this.usuarios          = usuarios;
         this.repositorio       = repositorio;
         this.operacoesDeRotina = operacoesDeRotina;
         this.operacoesDeCronograma = operacoesDeCronograma;
+        this.operacoesDeLembretes = operacoesDeLembretes;
     }
 
     public void run ()
@@ -241,6 +247,26 @@ public class SupervisoraDeConexao extends Thread
                     this.repositorio.registrar ("PEDIDO_PARA_ATUALIZAR_TAREFA", origem,
                                                 pedido.toString());
                     this.usuario.receba (this.operacoesDeCronograma.atualizarTarefa (pedido));
+                }
+                else if (comunicado instanceof PedidoParaBuscarPreferenciaEmail pedido)
+                {
+                    this.repositorio.registrar ("PEDIDO_PARA_BUSCAR_PREFERENCIA_EMAIL", origem,
+                                                pedido.getUsuarioId());
+                    this.usuario.receba (this.operacoesDeLembretes.buscarPreferenciaEmail (pedido));
+                }
+                else if (comunicado instanceof PedidoParaAtualizarPreferenciaEmail pedido)
+                {
+                    this.repositorio.registrar ("PEDIDO_PARA_ATUALIZAR_PREFERENCIA_EMAIL", origem,
+                                                pedido.getUsuarioId());
+                    this.usuario.receba (this.operacoesDeLembretes.atualizarPreferenciaEmail (pedido));
+                }
+                else if (comunicado instanceof PedidoParaBuscarLembretesEmail pedido)
+                {
+                    this.usuario.receba (this.operacoesDeLembretes.buscarLembretesEmail (pedido));
+                }
+                else if (comunicado instanceof PedidoParaConfirmarEnvioEmail pedido)
+                {
+                    this.usuario.receba (this.operacoesDeLembretes.confirmarEnvioEmail (pedido));
                 }
                 else if (comunicado instanceof PedidoParaSair)
                     break;
