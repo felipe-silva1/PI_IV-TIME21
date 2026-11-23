@@ -1,4 +1,5 @@
 //Max Thomazini Barbosa 25003934
+//Arthur Berto de Castro RA: 25009917
 package br.edu.time21.comunicacao;
 
 // aviso que o servidor manda a todos os conectados antes de se desativar.

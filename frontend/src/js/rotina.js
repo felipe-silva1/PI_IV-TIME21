@@ -1,6 +1,8 @@
+//Arthur Berto de Castro RA: 25009917
 const ROTINA_API_URL = 'http://localhost:8080/api/rotinas';
 const CHAVE_EXAME = 'exameSelecionado';
 
+// Catálogo de matérias disponíveis para cada vestibular.
 const CATALOGO_MATERIAS = {
     ENEM: [
         'Matemática', 'Redação', 'Português e Literatura', 'Física',
@@ -24,6 +26,7 @@ const CATALOGO_MATERIAS = {
     ]
 };
 
+// Referências aos elementos da interface usados pela página.
 const formRotina = document.getElementById('form-rotina');
 const botoesTurno = document.querySelectorAll('.btn-turno');
 const containerMaterias = document.getElementById('lista-materias');
@@ -52,11 +55,13 @@ let materiasPrioritarias = [];        // array ordenado por prioridade
 let etapaAtual = 1;
 let salvando = false;
 
+// Limpa mensagens exibidas de sucesso e erro.
 function limparMensagens() {
     erroEl.textContent = '';
     sucessoEl.textContent = '';
 }
 
+// Navega entre as etapas e atualiza a barra de progresso.
 function irParaEtapa(numero) {
     const direcao = numero > etapaAtual ? 'entra-direita' : 'entra-esquerda';
     etapaAtual = numero;
@@ -88,6 +93,7 @@ function irParaEtapa(numero) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Atualiza os estados dos botões conforme as seleções.
 function atualizarBotoes() {
     btnContinuar.disabled = turnosSelecionados.size === 0;
     btnSalvar.disabled = salvando || materiasPrioritarias.length === 0;
@@ -97,6 +103,7 @@ function chaveTurno(diaSemana, turno) {
     return `${diaSemana}:${turno}`;
 }
 
+// Monta a lista de matérias e destaca as prioridades selecionadas.
 function renderizarMaterias() {
     const lista = CATALOGO_MATERIAS[vestibularAtual] || CATALOGO_MATERIAS.ENEM;
     // Inclui matérias que já estavam salvas no perfil mesmo se o usuário trocou de exame
@@ -132,6 +139,7 @@ function renderizarMaterias() {
     atualizarBotoes();
 }
 
+// Sincroniza os turnos selecionados com os botões da tela.
 function atualizarTurnosNaTela() {
     botoesTurno.forEach(btn => {
         const chave = chaveTurno(Number(btn.dataset.dia), btn.dataset.turno);
@@ -147,6 +155,7 @@ function atualizarTurnosNaTela() {
     atualizarBotoes();
 }
 
+// Adiciona ou remove uma matéria da lista de prioridades.
 function alternarMateria(materia) {
     limparMensagens();
     const idx = materiasPrioritarias.indexOf(materia);
@@ -158,6 +167,7 @@ function alternarMateria(materia) {
     renderizarMaterias();
 }
 
+// Permite selecionar ou retirar turnos individuais.
 botoesTurno.forEach(btn => {
     btn.addEventListener('click', () => {
         limparMensagens();
@@ -171,6 +181,7 @@ botoesTurno.forEach(btn => {
     });
 });
 
+// Marca ou desmarca todos os turnos de um dia.
 botoesDia.forEach(btn => {
     btn.addEventListener('click', () => {
         limparMensagens();
@@ -182,6 +193,7 @@ botoesDia.forEach(btn => {
     });
 });
 
+// Avança para a etapa de matérias após validar os turnos.
 btnContinuar.addEventListener('click', () => {
     if (turnosSelecionados.size === 0) {
         erroEl.textContent = 'Selecione pelo menos um turno livre na semana.';
@@ -192,6 +204,7 @@ btnContinuar.addEventListener('click', () => {
 
 btnVoltar.addEventListener('click', () => irParaEtapa(1));
 
+// Recupera a rotina existente e restaura as escolhas do usuário.
 async function carregarRotinaSalva() {
     exameAtualEl.textContent = vestibularAtual;
     renderizarMaterias();
@@ -255,6 +268,7 @@ formRotina.addEventListener('submit', async e => {
         return;
     }
 
+    // Converte as seleções de turno para o formato esperado pela API.
     const disponibilidade = Array.from(turnosSelecionados).map(chave => {
         const [diaSemana, turno] = chave.split(':');
         return { diaSemana: Number(diaSemana), turno };

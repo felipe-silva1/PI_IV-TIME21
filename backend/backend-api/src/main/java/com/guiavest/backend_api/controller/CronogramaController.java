@@ -1,3 +1,4 @@
+//Arthur Berto de Castro RA: 25009917
 package com.guiavest.backend_api.controller;
 
 import java.util.Map;
@@ -27,15 +28,19 @@ import br.edu.time21.comunicacao.Cronograma;
 @CrossOrigin(origins = {"http://localhost:5500", "http://127.0.0.1:5500"})
 public class CronogramaController
 {
+    // Dependências responsáveis por validar a sessão e gerar os cronogramas.
     private final AuthService authService;
     private final CronogramaService cronogramaService;
 
+    // Configura os serviços usados por todos os endpoints desta classe.
     public CronogramaController(AuthService authService, CronogramaService cronogramaService)
     {
         this.authService = authService;
         this.cronogramaService = cronogramaService;
     }
 
+    // Busca o cronograma da semana informada para o usuário autenticado.
+    // Quando o parâmetro "semana" não é enviado, o serviço usa a semana atual.
     @GetMapping
     public ResponseEntity<?> buscarCronograma(
             @RequestHeader(value = "Authorization", required = false) String authorization,
@@ -50,7 +55,10 @@ public class CronogramaController
                         .body(Map.of("message", "Cronograma ainda não gerado para esta semana.")));
     }
 
-    /** Gera o primeiro mês do usuário autenticado e confirma a conclusão com HTTP 204. */
+    /**
+     * Gera o primeiro mês do usuário autenticado após a rotina ser cadastrada.
+     * Retorna HTTP 204 para indicar que o processamento terminou sem conteúdo adicional.
+     */
     @PostMapping("/gerar-primeiro-mes")
     public ResponseEntity<Void> gerarPrimeiroMes(
                 @RequestHeader(value = "Authorization", required = false)
@@ -60,6 +68,7 @@ public class CronogramaController
         return ResponseEntity.noContent().build();
 }
 
+    // Gera e salva o cronograma da semana especificada.
     @PostMapping("/gerar")
     public ResponseEntity<Cronograma> gerarCronograma(
             @RequestHeader(value = "Authorization", required = false) String authorization,
@@ -69,6 +78,7 @@ public class CronogramaController
         return ResponseEntity.ok(this.cronogramaService.gerarESalvar(usuario.usuarioId(), semana));
     }
 
+    // Permite criar um cronograma usando o método POST na rota base.
     @PostMapping
     public ResponseEntity<Cronograma> criarCronograma(
             @RequestHeader(value = "Authorization", required = false) String authorization,
@@ -77,6 +87,7 @@ public class CronogramaController
         return gerarCronograma(authorization, semana);
     }
 
+    // Permite regerar ou substituir o cronograma pela rota PUT.
     @PutMapping
     public ResponseEntity<Cronograma> regerarCronograma(
             @RequestHeader(value = "Authorization", required = false) String authorization,
@@ -85,6 +96,7 @@ public class CronogramaController
         return gerarCronograma(authorization, semana);
     }
 
+    // Traduz exceções do domínio em respostas HTTP padronizadas com status e mensagem.
     @ExceptionHandler(CronogramaException.class)
     public ResponseEntity<?> erroDeCronograma(CronogramaException erro)
     {
@@ -92,6 +104,8 @@ public class CronogramaController
                 .body(Map.of("message", erro.getMessage()));
     }
 
+    // Extrai o token Bearer do cabeçalho e verifica se ele pertence a uma sessão ativa.
+    // Um token ausente ou expirado interrompe a requisição com uma exceção 401.
     private SessionUser autenticar(String authorization)
     {
         String token = (authorization != null && authorization.startsWith("Bearer "))

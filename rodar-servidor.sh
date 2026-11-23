@@ -1,4 +1,5 @@
 #!/bin/bash
+# Arthur Berto de Castro RA: 25009917
 echo "==================================================="
 echo "Iniciando o Servidor Java (Sockets) na porta 3000..."
 echo "==================================================="

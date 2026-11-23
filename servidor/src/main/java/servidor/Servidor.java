@@ -1,3 +1,4 @@
+//Autor: Arthur Berto de Castro RA: 25009917
 package servidor;
 
 import java.util.*;
@@ -14,6 +15,7 @@ public class Servidor {
     // diferencia maiusculas: tem de ser igual ao nome no Atlas
     public static String BANCO_GUIAVEST = "guiavest";
 
+    // Obtém configuração dos argumentos, das variáveis de ambiente ou do padrão.
     private static String config (String[] args, int pos, String variavel, String padrao)
     {
         if (args.length>pos)
@@ -27,15 +29,18 @@ public class Servidor {
     }
 
     public static void main (String[] args) {
+        // Valida os argumentos informados na inicialização.
         if (args.length > 2) {
             System.err.println("Uso esperado: java Servidor <PORTA> <MONGO_URI>\n");
             System.err.println("Ou variaveis de ambiente: SERVIDOR_PORTA, MONGO_URI\n");
             return;
         }
 
+        // Resolve porta e URI do MongoDB usados pelo servidor.
         String porta    = Servidor.config (args, 0, "SERVIDOR_PORTA", Servidor.PORTA_PADRAO);
         String mongoUri = Servidor.config (args, 1, "MONGO_URI",      Servidor.MONGO_URI_PADRAO);
 
+        // Inicializa o repositório e as operações da aplicação.
         RepositorioDeChamadas repositorio       = null;
         OperacoesDeRotina     operacoesDeRotina = null;
         OperacoesDeCronograma operacoesDeCronograma = null;
@@ -51,8 +56,10 @@ public class Servidor {
             return;
         }
 
+        // Mantém a lista de clientes conectados ao servidor.
         ArrayList<Parceiro> usuarios = new ArrayList<Parceiro> ();
 
+        // Inicia a thread responsável por aceitar novas conexões.
         AceitadoraDeConexao aceitadoraDeConexao = null;
         try
         {
@@ -67,11 +74,13 @@ public class Servidor {
             return;
         }
 
+        // Registra a inicialização e prepara os índices do banco.
         System.out.println("O servidor esta ativo na porta " + porta);
         repositorio.registrar("SERVIDOR_INICIADO", "local", "porta=" + porta);
         operacoesDeRotina.garantirIndices();
         operacoesDeCronograma.garantirIndices();
 
+        // Aguarda comandos enviados pelo operador no terminal.
         for(;;)
         {
             System.out.println("Para desativar, use o comando \"desativar\"\n");
@@ -90,6 +99,7 @@ public class Servidor {
                 continue;
             }
 
+            // Desativa o servidor e encerra todas as conexões ativas.
             if (comando.toLowerCase().equals("desativar"))
             {
                 synchronized (usuarios)
@@ -118,4 +128,3 @@ public class Servidor {
         }
     }
 }
-

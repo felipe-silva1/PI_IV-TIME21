@@ -1,3 +1,4 @@
+//Arthur Berto de Castro RA: 25009917
 package com.guiavest.backend_api.service;
 
 import br.edu.time21.comunicacao.PedidoParaBuscarRotina;
@@ -21,6 +22,7 @@ import java.util.Set;
 @Service
 public class RotinaService
 {
+    // Lista as matérias válidas para cada vestibular.
     private static final Map<String, Set<String>> CATALOGO_MATERIAS = Map.of(
             "ENEM", Set.of(
                     "Matemática", "Redação", "Português e Literatura", "Física",
@@ -46,16 +48,19 @@ public class RotinaService
             )
     );
 
+    // Conjunto de turnos aceitos pela aplicação.
     private static final Set<String> TURNOS_VALIDOS =
             Set.of(TurnoLivre.MANHA, TurnoLivre.TARDE, TurnoLivre.NOITE);
 
     private final ClienteSocket clienteSocket;
 
+    // Injeta o cliente usado para comunicar com o servidor Java.
     public RotinaService(ClienteSocket clienteSocket)
     {
         this.clienteSocket = clienteSocket;
     }
 
+    // Solicita ao servidor a rotina associada ao usuário.
     public Optional<Rotina> buscarPorUsuario(String usuarioId)
     {
         Resposta resposta = this.clienteSocket.enviar(new PedidoParaBuscarRotina(usuarioId));
@@ -69,6 +74,7 @@ public class RotinaService
         throw new RotinaException(503, "Não foi possível consultar a rotina no momento.");
     }
 
+    // Valida os dados e salva a rotina do usuário.
     public Rotina salvar(String usuarioId, RotinaRequest request)
     {
         if (request == null || request.vestibular() == null || request.vestibular().isBlank())
@@ -82,6 +88,7 @@ public class RotinaService
         if (request.disponibilidade() == null || request.disponibilidade().isEmpty())
             throw new RotinaException(400, "Selecione pelo menos um turno livre na semana.");
 
+        // Normaliza os turnos e remove possíveis duplicatas.
         Set<TurnoLivre> turnosUnicos = new LinkedHashSet<>();
         for (RotinaRequest.TurnoItem item : request.disponibilidade())
         {
@@ -99,6 +106,7 @@ public class RotinaService
         if (request.materiasPrioritarias() == null || request.materiasPrioritarias().isEmpty())
             throw new RotinaException(400, "Selecione pelo menos uma matéria prioritária.");
 
+        // Valida as matérias e preserva a ordem das prioridades.
         Set<String> materiasUnicas = new LinkedHashSet<>();
         for (String materia : request.materiasPrioritarias())
         {
@@ -113,6 +121,7 @@ public class RotinaService
                 throw new RotinaException(400, "Não repita a mesma matéria na lista de prioridades.");
         }
 
+        // Monta a rotina após todas as validações serem aprovadas.
         Rotina rotina = new Rotina(
                 usuarioId,
                 vestibular,
@@ -120,6 +129,7 @@ public class RotinaService
                 new ArrayList<>(materiasUnicas)
         );
 
+        // Envia o pedido de salvamento ao servidor Java.
         Resposta resposta = this.clienteSocket.enviar(new PedidoParaSalvarRotina(rotina));
 
         if (resposta instanceof RespostaDeRotina respRotina && respRotina.getRotina() != null)
@@ -131,6 +141,7 @@ public class RotinaService
         throw new RotinaException(503, "Não foi possível salvar a rotina agora.");
     }
 
+    // Converte respostas de erro do servidor em exceções HTTP.
     private static RotinaException traduzirErro(RespostaDeErro erro)
     {
         if (RespostaDeErro.PEDIDO_INVALIDO.equals(erro.getCodigo()))

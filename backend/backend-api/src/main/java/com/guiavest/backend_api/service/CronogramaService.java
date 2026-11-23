@@ -1,3 +1,4 @@
+//Arthur Berto de Castro RA: 25009917
 package com.guiavest.backend_api.service;
 
 import java.time.DayOfWeek;
@@ -29,10 +30,14 @@ import br.edu.time21.comunicacao.Topico;
 @Service
 public class CronogramaService
 {
+    // Cliente responsável pela comunicação com o servidor Java.
     private final ClienteSocket clienteSocket;
+    // Serviço usado para obter os dados da rotina configurada pelo estudante.
     private final RotinaService rotinaService;
+    // Componente que distribui matérias e tópicos nos blocos de estudo.
     private final GeradorDeCronograma geradorDeCronograma;
 
+    // Recebe as dependências necessárias para consultar rotina, gerar cronograma e persistir dados.
     public CronogramaService(
             ClienteSocket clienteSocket,
             RotinaService rotinaService,
@@ -43,6 +48,8 @@ public class CronogramaService
         this.geradorDeCronograma = geradorDeCronograma;
     }
 
+    // Busca o cronograma correspondente à segunda-feira informada pelo usuário.
+    // Quando nenhuma semana é fornecida, o método usa automaticamente a semana atual.
     public Optional<Cronograma> buscarDaSemana(String usuarioId, String semanaTexto)
     {
         LocalDate segunda = resolverSegundaFeira(semanaTexto);
@@ -61,6 +68,9 @@ public class CronogramaService
     /**
      * Gera os blocos dos 30 dias a partir da criação da rotina
      * e preserva os cronogramas já gravados.
+     *
+     * O período começa na data em que a rotina foi criada. Se essa informação
+     * não estiver disponível, a data atual é usada como ponto inicial.
      */
     public void gerarPrimeiroMes(String usuarioId)
     {
@@ -73,11 +83,13 @@ public class CronogramaService
         gerarPrimeiroMes(rotina, inicio);
     }
 
+    // Sobrecarga usada por cenários internos que precisam informar uma data inicial.
     void gerarPrimeiroMes(String usuarioId, LocalDate inicio)
     {
         gerarPrimeiroMes(buscarRotina(usuarioId), inicio);
     }
 
+    // Percorre as semanas do período de 30 dias e cria somente as semanas ainda inexistentes.
     private void gerarPrimeiroMes(Rotina rotina, LocalDate inicio)
     {
         String usuarioId = rotina.getUsuarioId();
@@ -90,9 +102,11 @@ public class CronogramaService
         {
             String semana = segunda.toString();
 
+            // Preserva cronogramas já salvos, evitando sobrescrever dados do usuário.
             if (buscarDaSemana(usuarioId, semana).isPresent())
                 continue;
 
+            // Gera os blocos da semana e filtra apenas os dias dentro do período permitido.
             List<BlocoDeEstudo> blocosDoPeriodo = gerarBlocosDaSemana(rotina, segunda)
                     .stream()
                     .filter(bloco -> {
@@ -106,6 +120,7 @@ public class CronogramaService
         }
     }
 
+    // Gera uma semana específica novamente e envia o resultado para persistência.
     public Cronograma gerarESalvar(String usuarioId, String semanaTexto)
     {
         LocalDate segunda = resolverSegundaFeira(semanaTexto);
@@ -113,6 +128,8 @@ public class CronogramaService
         return salvarSemana(usuarioId, segunda, blocosGerados);
     }
 
+    // Consulta a rotina do usuário antes da geração.
+    // A rotina é obrigatória porque define turnos disponíveis e matérias prioritárias.
     private Rotina buscarRotina(String usuarioId)
     {
         try
@@ -127,6 +144,7 @@ public class CronogramaService
         }
     }
 
+    // Solicita ao gerador os blocos da semana e valida se alguma produção foi possível.
     private List<BlocoDeEstudo> gerarBlocosDaSemana(Rotina rotina, LocalDate segunda)
     {
         List<BlocoDeEstudo> blocosGerados = this.geradorDeCronograma.gerar(rotina, segunda);
@@ -137,6 +155,8 @@ public class CronogramaService
         return blocosGerados;
     }
 
+    // Converte os modelos usados pela API para as classes do protocolo de comunicação.
+    // Em seguida, cria o cronograma da semana e envia o pedido de salvamento ao servidor.
     private Cronograma salvarSemana(
             String usuarioId, LocalDate segunda, List<BlocoDeEstudo> blocosGerados)
     {
@@ -175,6 +195,8 @@ public class CronogramaService
         throw new CronogramaException(503, "Não foi possível salvar o cronograma gerado.");
     }
 
+    // Normaliza o texto recebido para uma segunda-feira no formato ISO.
+    // Datas inválidas são rejeitadas antes de qualquer consulta ou gravação.
     private static LocalDate resolverSegundaFeira(String semanaTexto)
     {
         if (semanaTexto == null || semanaTexto.isBlank())
@@ -191,6 +213,7 @@ public class CronogramaService
         }
     }
 
+    // Traduz os códigos retornados pelo servidor em erros HTTP compreensíveis pela API.
     private static CronogramaException traduzirErro(RespostaDeErro erro)
     {
         if (RespostaDeErro.PEDIDO_INVALIDO.equals(erro.getCodigo()))
@@ -200,6 +223,7 @@ public class CronogramaService
         return new CronogramaException(503, "Não foi possível acessar o serviço de cronogramas.");
     }
 
+    // Exceção específica do domínio que associa uma falha a um status HTTP.
     public static class CronogramaException extends RuntimeException
     {
         private final int status;

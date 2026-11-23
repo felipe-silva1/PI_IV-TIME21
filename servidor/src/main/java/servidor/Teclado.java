@@ -1,3 +1,4 @@
+// Classe usada do modelo de servidor do professor maligno
 package servidor;
 
 import java.io.*;

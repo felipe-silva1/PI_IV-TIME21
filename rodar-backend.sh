@@ -1,4 +1,5 @@
 #!/bin/bash
+# Arthur Berto de Castro RA: 25009917
 echo "==================================================="
 echo "Iniciando o Backend Spring Boot na porta 8080..."
 echo "==================================================="
